@@ -1,8 +1,15 @@
+<br />
+<p align="center">
+
+  <h3 align="center"> Slack-WebSocket </h3>
+</p>
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
 
 [circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
+
 [circleci-url]: https://circleci.com/gh/nestjs/nest
 
   <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
@@ -22,11 +29,53 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
+## Table of Contents
+
+- [Table of Contents](#table-of-contents)
+- [Description](#description)
+- [Features](#features)
+- [Technologies](#technologies)
+- [Project setup](#project-setup)
+- [Compile and run the project](#compile-and-run-the-project)
+- [Run tests](#run-tests)
+- [Usage](#usage)
+- [License](#license)
+
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+This project is a backend application designed to provide real-time communication between users, similar to Slack. The
+system will consist of multiple servers, each containing various chat rooms. The platform will have user chat rooms, as
+well as special chat rooms for administrators, allowing efficient and scalable communication for both regular users and
+admins.
+
+## Features
+
+- **Servers**: Multiple servers to handle communication between users.
+- **Chat Rooms**: Each server will have multiple chat rooms, where users can communicate in real-time.
+- **User and Admin Chats**: Separate chat rooms for users and admins to ensure smooth communication and management.
+- **Real-time Communication**: Powered by WebSocket technology for instant message delivery.
+- **Scalable Architecture**: Designed to scale across multiple servers and chat rooms.
+- **Authentication**: User authentication for joining chats and managing their connections.
+- **Moderation**: Admins can monitor, moderate, and manage chat rooms and users.
+
+## Technologies
+
+- **WebSocket**: For real-time, two-way communication.
+- **Node.js**: For handling the server-side logic and WebSocket connections.
+- **Socket.IO**: A library for real-time web applications.
+- **NestJs**: For setting up the server and routing.
+- **JWT (JSON Web Token)**: For user authentication and session management.
 
 ## Project setup
+
+1. Clone the repository:
+
+```bash
+$ git https://github.com/ahmedhany14/slack-ws.git
+$ cd slack-ws
+```
+
+2. Install dependencies:
 
 ```bash
 $ pnpm install
@@ -58,41 +107,11 @@ $ pnpm run test:e2e
 $ pnpm run test:cov
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ pnpm install -g mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## Usage
+* **WebSocket Server**: The backend will expose WebSocket connections for users and admins to join different chat rooms.
+* **Admin Control**: Admins can monitor and control all the chat rooms, manage users, and send system-wide
+  announcements.
+* **User Interaction**: Regular users can join specific chat rooms and interact with each other in real time.
 
 ## License
 
