@@ -35,6 +35,8 @@
 - [Description](#description)
 - [Features](#features)
 - [Technologies](#technologies)
+- [Entity Relationship Diagram (ERD)](#entity-relationship-diagram-erd)
+- [System Design](#system-design)
 - [Project setup](#project-setup)
 - [Compile and run the project](#compile-and-run-the-project)
 - [Run tests](#run-tests)
@@ -65,6 +67,21 @@ admins.
 - **Socket.IO**: A library for real-time web applications.
 - **NestJs**: For setting up the server and routing.
 - **JWT (JSON Web Token)**: For user authentication and session management.
+
+## Entity Relationship Diagram (ERD)
+
+<p>The following image illustrates the overall database structure used in this project:</p>
+
+<div align="center">
+  <img src="imgs/erd.png" alt="Entity Relationship Diagram" width="700" style="border: 1px solid #ccc; border-radius: 8px;" />
+</div>
+
+## System Design
+
+<p>The following image illustrates the overall system design used in this project:</p>
+<div align="center">
+  <img src="imgs/system.design.png" alt="System Design" width="700" style="border: 1px solid #ccc; border-radius: 8px;" />
+</div>
 
 ## Project setup
 
@@ -108,6 +125,7 @@ $ pnpm run test:cov
 ```
 
 ## Usage
+
 * **WebSocket Server**: The backend will expose WebSocket connections for users and admins to join different chat rooms.
 * **Admin Control**: Admins can monitor and control all the chat rooms, manage users, and send system-wide
   announcements.
