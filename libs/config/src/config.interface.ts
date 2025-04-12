@@ -7,6 +7,7 @@ export interface authAppConfig {
 
 export interface authConfig {
     jwtSecret: string;
+    expiresIn: number;
 }
 
 export interface dbConfig {

@@ -9,6 +9,7 @@ export default (): Config => ({
     },
     authConfig: {
         jwtSecret: process.env.JWT_SECRET || '',
+        expiresIn: parseInt(process.env.JWT_EXPIRE_IN || '36000', 10),
     },
 
     dbConfig: {
