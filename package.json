@@ -27,17 +27,21 @@
     "@nestjs/mapped-types": "^2.1.0",
     "@nestjs/microservices": "^11.0.16",
     "@nestjs/platform-express": "^11.0.15",
-    "bcrypt": "^5.1.1",
+    "@nestjs/typeorm": "^11.0.0",
+    "@types/bcrypt": "^5.0.2",
     "bcryptjs": "^3.0.2",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "cookie-parser": "^1.4.7",
+    "crypto": "^1.0.1",
     "joi": "^17.13.3",
     "nestjs-pino": "^4.4.0",
     "pino-http": "^10.4.0",
     "pino-pretty": "^13.0.0",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "typeorm": "^0.3.22",
+    "typeorm-naming-strategies": "^4.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
@@ -51,6 +55,7 @@
     "@types/jest": "^29.5.14",
     "@types/node": "^22.10.7",
     "@types/supertest": "^6.0.2",
+    "bcrypt": "^5.1.1",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.2",
@@ -88,6 +93,7 @@
     ],
     "moduleNameMapper": {
       "^@app/config(|/.*)$": "<rootDir>/libs/config/src/$1",
+      "^@app/database(|/.*)$": "<rootDir>/libs/database/src/$1",
       "^@app/logger(|/.*)$": "<rootDir>/libs/logger/src/$1"
     }
   },

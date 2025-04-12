@@ -28,6 +28,15 @@
         "tsConfigPath": "libs/config/tsconfig.lib.json"
       }
     },
+    "database": {
+      "type": "library",
+      "root": "libs/database",
+      "entryFile": "index",
+      "sourceRoot": "libs/database/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/database/tsconfig.lib.json"
+      }
+    },
     "logger": {
       "type": "library",
       "root": "libs/logger",

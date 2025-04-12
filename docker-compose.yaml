@@ -1,17 +1,39 @@
 services:
-  auth:
-    image: auth
-    build:
-      context: .
-      dockerfile: ./apps/auth/Dockerfile
-      target: dev
+    auth:
+        image: auth
+        build:
+            context: .
+            dockerfile: ./apps/auth/Dockerfile
+            target: dev
+        command: pnpm run start:dev auth
+        ports:
+            - '8080:8080'
+        env_file:
+            - .dev.env
+        volumes:
+            - .:/app
+        depends_on:
+            - postgres
 
-    command: pnpm run start:dev auth
+    postgres:
+        image: postgres:13
+        container_name: postgres_db
+        env_file:
+            - .dev.env
+        ports:
+            - '5433:5432'
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
 
-    ports:
-      - "8080:8080"
-    env_file:
-      - .dev.env
-
-    volumes:
-      - .:/app
+    pgadmin:
+        image: dpage/pgadmin4
+        container_name: pgadmin
+        restart: always
+        ports:
+            - '5050:80'
+        env_file:
+            - .dev.env
+        depends_on:
+            - postgres
+volumes:
+    postgres_data:

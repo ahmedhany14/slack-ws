@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 
 // bcrypt
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class BcryptProvider {
