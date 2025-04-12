@@ -6,7 +6,7 @@ import { Account } from './account.entity';
 export class Server extends AbstractEntity<Server> {
     @Column({
         type: 'varchar',
-        length: 255,
+        length: 32,
         nullable: false,
     })
     name: string;
@@ -29,6 +29,6 @@ export class Server extends AbstractEntity<Server> {
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE',
     })
-    @JoinColumn({ name: 'server_id' })
+    @JoinColumn({ name: 'owner_id' })
     owner: Account;
 }

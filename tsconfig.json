@@ -34,13 +34,19 @@
         "libs/constants/src"
       ],
       "@app/constants/*": [
-        "libs/constants/src/*",
+        "libs/constants/src/*"
       ],
       "@app/database": [
         "libs/database/src"
       ],
       "@app/database/*": [
         "libs/database/src/*"
+      ],
+      "@app/decorators": [
+        "libs/decorators/src"
+      ],
+      "@app/decorators/*": [
+        "libs/decorators/src/*"
       ],
       "@app/logger": [
         "libs/logger/src"

@@ -44,4 +44,11 @@ async function bootstrap() {
     await app.listen(process.env.SLACK_HTTP_PORT ?? 3000);
 }
 
-bootstrap().then(() => {});
+bootstrap().then(() => {
+    console.log(`
+slack service is running on port ${process.env.SLACK_HTTP_PORT ?? 3000}
+logic: ${process.env.SLACK_SERVICE_URL ?? `http://${process.env.SLACK_HOSTNAME}:${process.env.SLACK_HTTP_PORT ?? 3000}`}
+microservice: on port ${process.env.SLACK_TCP_PORT ?? 3001}
+`);
+
+});
