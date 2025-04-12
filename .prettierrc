@@ -7,12 +7,5 @@
   "semi": true,
   "bracketSpacing": true,
   "arrowParens": "always",
-  "endOfLine": "lf",
-  "htmlWhitespaceSensitivity": "ignore",
-  "vueIndentScriptAndStyle": true,
-  "proseWrap": "preserve",
-  "quoteProps": "as-needed",
-  "jsxSingleQuote": false,
-  "jsxBracketSameLine": false,
-  "insertPragma": false
+  "endOfLine": "lf"
 }

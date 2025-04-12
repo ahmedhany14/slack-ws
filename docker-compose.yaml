@@ -1,0 +1,17 @@
+services:
+  auth:
+    image: auth
+    build:
+      context: .
+      dockerfile: ./apps/auth/Dockerfile
+      target: dev
+
+    command: pnpm run start:dev auth
+
+    ports:
+      - "8080:8080"
+    env_file:
+      - .dev.env
+
+    volumes:
+      - .:/app
