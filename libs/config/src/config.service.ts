@@ -18,4 +18,8 @@ export class ConfigService {
         return this.nestConfigService.get<Config['dbConfig']>('dbConfig');
     }
 
+    get slackConfig(): Config['slackConfig'] | undefined {
+        return this.nestConfigService.get<Config['slackConfig']>('slackConfig');
+    }
+
 }

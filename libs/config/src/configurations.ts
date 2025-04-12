@@ -11,7 +11,6 @@ export default (): Config => ({
         jwtSecret: process.env.AUTH_JWT_SECRET || '',
         expiresIn: parseInt(process.env.AUTH_JWT_EXPIRE_IN || '36000', 10),
     },
-
     dbConfig: {
         type: process.env.POSTGRES_TYPE || 'postgres',
         host: process.env.POSTGRES_HOST || 'localhost',
@@ -21,4 +20,9 @@ export default (): Config => ({
         database: process.env.POSTGRES_DB || 'slack_ws_db',
         synchronize: process.env.DB_SYNC === 'true' || false,
     },
+    slackConfig:{
+        hostname: process.env.SLACK_HOSTNAME || 'slack',
+        httpPort: parseInt(process.env.SLACK_HTTP_PORT || '8082', 10),
+        tcpPort: parseInt(process.env.SLACK_TCP_PORT || '8083', 10),
+    }
 });

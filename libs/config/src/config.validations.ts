@@ -4,8 +4,8 @@ export default Joi.object({
     NODE_ENV: Joi.string().default('development'),
 
     // auth app
-    AUTH_HTTP_PORT: Joi.number().default(3000),
-    AUTH_TCP_PORT: Joi.number().default(3001),
+    AUTH_HTTP_PORT: Joi.number().default(8080),
+    AUTH_TCP_PORT: Joi.number().default(8081),
     AUTH_HOSTNAME: Joi.string().default('auth'),
     AUTH_JWT_SECRET: Joi.string().required(),
     AUTH_JWT_EXPIRE_IN: Joi.number().required().integer(),
@@ -18,4 +18,9 @@ export default Joi.object({
     POSTGRES_DB: Joi.string().default('slack_ws_db'),
     PGADMIN_DEFAULT_EMAIL: Joi.string().required().email(),
     PGADMIN_DEFAULT_PASSWORD: Joi.string().required(),
+
+    // slack
+    SLACK_HOSTNAME: Joi.string().default('slack'),
+    SLACK_HTTP_PORT: Joi.number().default(8082),
+    SLACK_TCP_PORT: Joi.number().default(8083),
 });

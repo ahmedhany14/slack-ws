@@ -20,8 +20,16 @@ export interface dbConfig {
     synchronize: boolean;
 }
 
+export interface slackManagementConfig {
+    hostname: string;
+    httpPort: number;
+    tcpPort: number;
+}
+
+
 export interface Config {
     authApp: authAppConfig;
     authConfig: authConfig;
     dbConfig: dbConfig;
+    slackConfig: slackManagementConfig;
 }

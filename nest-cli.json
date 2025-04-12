@@ -64,6 +64,15 @@
         "tsConfigPath": "libs/logger/tsconfig.lib.json"
       }
     },
+    "slack.management": {
+      "type": "application",
+      "root": "apps/slack.management",
+      "entryFile": "main",
+      "sourceRoot": "apps/slack.management/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/slack.management/tsconfig.app.json"
+      }
+    },
     "test": {
       "type": "application",
       "root": "apps/test",
