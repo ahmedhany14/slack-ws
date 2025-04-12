@@ -48,6 +48,12 @@
       "@app/decorators/*": [
         "libs/decorators/src/*"
       ],
+      "@app/interfaces": [
+        "libs/interfaces/src"
+      ],
+      "@app/interfaces/*": [
+        "libs/interfaces/src/*"
+      ],
       "@app/logger": [
         "libs/logger/src"
       ],

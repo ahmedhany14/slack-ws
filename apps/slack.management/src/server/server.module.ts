@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DatabaseModule, Server } from '@app/database';
@@ -7,6 +7,7 @@ import { AUTH_SERVICE } from '@app/constants';
 
 import { ServerService } from './server.service';
 import { ServerController } from './server.controller';
+import { FetchServerMiddleware } from './middlewares/fetch.server.middleware';
 
 @Module({
     imports: [
@@ -19,7 +20,6 @@ import { ServerController } from './server.controller';
                 inject: [ConfigService],
                 name: AUTH_SERVICE,
                 useFactory: (configService: ConfigService) => (
-                    console.log(configService.authAppConfig),
                     {
                         transport: Transport.TCP,
                         options: {
@@ -34,4 +34,12 @@ import { ServerController } from './server.controller';
     controllers: [ServerController],
     providers: [ServerService],
 })
-export class ServerModule {}
+export class ServerModule implements NestModule {
+    configure(consumer: MiddlewareConsumer) {
+        consumer.apply(FetchServerMiddleware).forRoutes({
+            path: 'server/:id',
+            method: RequestMethod.PATCH,
+
+        });
+    }
+}

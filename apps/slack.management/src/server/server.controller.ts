@@ -1,7 +1,7 @@
 import { Body, Controller, Inject, Param, Patch, Post, UseGuards } from '@nestjs/common';
 
 // libraries
-import { AuthGuard } from '@app/auth.common';
+import { AllowedServerUpdateGuard, AuthGuard } from '@app/auth.common';
 import { ExtractUserData } from '@app/decorators';
 import { Server } from '@app/database';
 
@@ -28,6 +28,7 @@ export class ServerController {
         } as Server);
     }
 
+    @UseGuards(AllowedServerUpdateGuard)
     @Patch(':id')
     async update(@Body() updateServerDto: UpdateServerDto, @Param('id') id: number) {
         const server = await this.serverService.findOneAndUpdate({ id }, { ...updateServerDto });
