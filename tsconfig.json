@@ -18,8 +18,24 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
+      "@app/auth.common": [
+        "libs/auth.common/src",
+        "libs/auth.common/src"
+      ],
+      "@app/auth.common/*": [
+        "libs/auth.common/src/*",
+        "libs/auth.common/src/*"
+      ],
       "@app/config/*": [
-        "libs/config/src/*",
+        "libs/config/src/*"
+      ],
+      "@app/constants": [
+        "libs/constants/src",
+        "libs/constants/src"
+      ],
+      "@app/constants/*": [
+        "libs/constants/src/*",
+        "libs/constants/src/*"
       ],
       "@app/database": [
         "libs/database/src"

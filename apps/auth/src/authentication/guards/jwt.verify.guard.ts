@@ -19,8 +19,7 @@ export class JwtVerifyGuard implements CanActivate {
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const request = context.switchToHttp().getRequest();
-
-        const token = this.extractToken(request);
+        const token = request.Authentication.split(' ')[1];
         if (!token)
             throw new UnauthorizedException('You are not authorized to access this resource');
 
@@ -31,19 +30,9 @@ export class JwtVerifyGuard implements CanActivate {
             throw new UnauthorizedException('Invalid token');
         }
 
-        const account = await this.accountService.findOne({ id: payload.id });
-        if (!account) throw new NotFoundException('Account not found');
-        request.account = account;
+        const user = await this.accountService.findOne({ id: payload.id });
+        if (!user) throw new NotFoundException('Account not found');
+        request.user = user;
         return true;
-    }
-
-    private extractToken(request: Request) {
-        const authorization = request.headers['authorization'];
-        if (!authorization) return null;
-        const parts = authorization.split(' ');
-        if (parts.length !== 2) return null;
-        const [scheme, token] = parts;
-        if (!/^Bearer$/i.test(scheme)) return null;
-        return token;
     }
 }

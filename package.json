@@ -93,7 +93,9 @@
       "<rootDir>/libs/"
     ],
     "moduleNameMapper": {
+      "^@app/auth.common(|/.*)$": "<rootDir>/libs/auth.common/src/$1",
       "^@app/config(|/.*)$": "<rootDir>/libs/config/src/$1",
+      "^@app/constants(|/.*)$": "<rootDir>/libs/constants/src/$1",
       "^@app/database(|/.*)$": "<rootDir>/libs/database/src/$1",
       "^@app/logger(|/.*)$": "<rootDir>/libs/logger/src/$1"
     }

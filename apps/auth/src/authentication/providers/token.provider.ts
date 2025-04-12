@@ -8,7 +8,7 @@ import { Account } from '@app/database';
 
 // Interfaces
 // Services
-import { ConfigService } from '@app/config';
+import { ConfigService } from '@app/config/config.service';
 
 export interface JwtPayload {
     id: number;

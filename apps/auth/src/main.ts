@@ -10,8 +10,8 @@ async function bootstrap() {
     app.connectMicroservice({
         transport: Transport.TCP,
         options: {
-            host: process.env.HOSTNAME,
-            port: Number(process.env.TCP_PORT ?? 3001),
+            host: process.env.AUTH_HOSTNAME,
+            port: Number(process.env.AUTH_TCP_PORT),
         },
     });
 
@@ -31,14 +31,17 @@ async function bootstrap() {
         }),
     );
     app.useLogger(app.get(Logger));
+    await app.startAllMicroservices().then(() => {
+        console.log('Auth microservice is running');
+    })
 
-    await app.listen(process.env.HTTP_PORT ?? 3000);
+    await app.listen(process.env.AUTH_HTTP_PORT ?? 3000);
 }
 
 bootstrap().then(() => {
     console.log(`
-Auth service is running on port ${process.env.HTTP_PORT ?? 3000}
-logic: ${process.env.AUTH_SERVICE_URL ?? `http://${process.env.HOSTNAME}:${process.env.HTTP_PORT ?? 3000}`}
-microservice: on port ${process.env.TCP_PORT ?? 3001}
+Auth service is running on port ${process.env.AUTH_HTTP_PORT ?? 3000}
+logic: ${process.env.AUTH_SERVICE_URL ?? `http://${process.env.AUTH_HOSTNAME}:${process.env.AUTH_HTTP_PORT ?? 3000}`}
+microservice: on port ${process.env.AUTH_TCP_PORT ?? 3001}
 `);
 });

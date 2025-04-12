@@ -2,14 +2,14 @@ import { Config } from './config.interface';
 
 export default (): Config => ({
     authApp: {
-        hostname: process.env.HOSTNAME || 'auth',
+        hostname: process.env.AUTH_HOSTNAME || 'auth',
         env: process.env.NODE_ENV || 'development',
-        httpPort: parseInt(process.env.HTTP_PORT || '3000', 10),
-        tcpPort: parseInt(process.env.TCP_PORT || '3001', 10),
+        httpPort: parseInt(process.env.AUTH_HTTP_PORT || '3000', 10),
+        tcpPort: parseInt(process.env.AUTH_TCP_PORT || '3001', 10),
     },
     authConfig: {
-        jwtSecret: process.env.JWT_SECRET || '',
-        expiresIn: parseInt(process.env.JWT_EXPIRE_IN || '36000', 10),
+        jwtSecret: process.env.AUTH_JWT_SECRET || '',
+        expiresIn: parseInt(process.env.AUTH_JWT_EXPIRE_IN || '36000', 10),
     },
 
     dbConfig: {
