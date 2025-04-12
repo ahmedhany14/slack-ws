@@ -6,6 +6,7 @@ import { Account } from '@app/database';
 import { TokenProvider } from './providers/token.provider';
 import { AccountService } from '../account/account.service';
 import { BcryptProvider } from './providers/bcrypt.provider';
+import { LoginDto } from './dtos/login.dto';
 
 @Injectable()
 export class AuthenticationService {
@@ -15,7 +16,23 @@ export class AuthenticationService {
         private readonly tokenProvider: TokenProvider,
     ) {}
 
-    async login() {}
+    async login(loginDto: LoginDto) {
+        const user = await this.accountService.findOne({ username: loginDto.username });
+        if (!user) throw new ConflictException('username not found');
+
+        const isPasswordValid = await this.bcryptProvider.compare(
+            loginDto.password,
+            user.password,
+        );
+        if (!isPasswordValid) throw new ConflictException('password not valid');
+
+        const token = await this.tokenProvider.generateToken(user);
+
+        return {
+            user,
+            token,
+        };
+    }
 
     async register(signupDto: SignupDto) {
         // hash password

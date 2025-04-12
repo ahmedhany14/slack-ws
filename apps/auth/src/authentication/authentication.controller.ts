@@ -1,5 +1,9 @@
 import { Body, Controller, Logger, Post } from '@nestjs/common';
+
+// service
 import { AuthenticationService } from './authentication.service';
+
+// dtos
 import { LoginDto } from './dtos/login.dto';
 import { SignupDto } from './dtos/signup.dto';
 
@@ -17,5 +21,9 @@ export class AuthenticationController {
     }
 
     @Post('sign-in')
-    async login(@Body() loginDto: LoginDto) {}
+    async login(@Body() loginDto: LoginDto) {
+        this.logger.log(`new loginDto: ${loginDto}`);
+
+        return this.authenticationService.login(loginDto);
+    }
 }
