@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, Req, UseGuards } from '@nestjs/common';
 import { TestService } from './test.service';
 import { AuthGuard } from '@app/auth.common';
 
@@ -8,7 +8,9 @@ export class TestController {
 
     @UseGuards(AuthGuard)
     @Get()
-    getHello(): string {
-        return this.testService.getHello();
+    getHello(
+        @Req() req
+    ): string {
+        return this.testService.getHello() + ' ' + req.user.username;
     }
 }

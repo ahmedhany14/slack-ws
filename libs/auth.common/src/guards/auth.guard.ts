@@ -28,15 +28,12 @@ export class AuthGuard implements CanActivate {
 
         return this.authClient.send('authenticate', { Authentication: jwt }).pipe(
             tap((response) => {
-                console.log(response);
                 context.switchToHttp().getRequest().user = response;
             }),
             map((response) => {
                 if (response) {
-                    console.log(response);
                     return true;
                 } else {
-                    console.log(response);
                     throw new UnauthorizedException(
                         'You are not authorized to access this resource',
                     );
