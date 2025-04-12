@@ -4,11 +4,11 @@ import { AuthService } from './auth.service';
 import { ConfigModule } from '@app/config/config.module';
 import { LoggerModule } from '@app/logger';
 import { BcryptProvider } from './providers/bcrypt.provider';
-import { AccountModule } from './account/account.module';
+import { DatabaseModule } from '@app/database';
 
 @Module({
-    imports: [ConfigModule, LoggerModule, AccountModule],
+    imports: [ConfigModule, LoggerModule, DatabaseModule],
     controllers: [AuthController],
     providers: [AuthService, BcryptProvider],
 })
-export class AuthModule {}
+export class AuthModule { }

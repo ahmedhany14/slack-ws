@@ -10,4 +10,14 @@ export default (): Config => ({
     authConfig: {
         jwtSecret: process.env.JWT_SECRET || '',
     },
+
+    dbConfig: {
+        type: process.env.POSTGRES_TYPE || 'postgres',
+        host: process.env.POSTGRES_HOST || 'localhost',
+        port: parseInt(process.env.POSTGRES_PORT || '5432', 10),
+        username: process.env.POSTGRES_USER || '',
+        password: process.env.POSTGRES_PASSWORD || '',
+        database: process.env.POSTGRES_DB || 'slack_ws_db',
+        synchronize: process.env.DB_SYNC === 'true' || false,
+    },
 });

@@ -14,4 +14,8 @@ export class ConfigService {
         return this.nestConfigService.get<Config['authConfig']>('authConfig');
     }
 
+    get dbConfig(): Config['dbConfig'] | undefined {
+        return this.nestConfigService.get<Config['dbConfig']>('dbConfig');
+    }
+
 }
