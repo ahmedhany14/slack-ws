@@ -4,8 +4,8 @@ import { Account } from './account.entity';
 
 
 
-@Entity('invitations')
-export class FreindsInvitations extends AbstractEntity<FreindsInvitations> {
+@Entity('friends_invitations')
+export class FriendsInvitations extends AbstractEntity<FriendsInvitations> {
 
     @ManyToOne(() => Account, (account) => account.add_request, {
         eager: true,
