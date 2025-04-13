@@ -22,4 +22,7 @@ export class ConfigService {
         return this.nestConfigService.get<Config['slackConfig']>('slackConfig');
     }
 
+    get socialNetworkConfig(): Config['socialNetworkConfig'] | undefined {
+        return this.nestConfigService.get<Config['socialNetworkConfig']>('socialNetworkConfig');
+    }
 }

@@ -26,10 +26,16 @@ export interface slackManagementConfig {
     tcpPort: number;
 }
 
+export interface socialNetworkManagementConfig {
+    hostname: string;
+    httpPort: number;
+    tcpPort: number;
+}
 
 export interface Config {
     authApp: authAppConfig;
     authConfig: authConfig;
     dbConfig: dbConfig;
     slackConfig: slackManagementConfig;
+    socialNetworkConfig: socialNetworkManagementConfig;
 }

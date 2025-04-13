@@ -91,6 +91,15 @@
         "tsConfigPath": "apps/slack.management/tsconfig.app.json"
       }
     },
+    "social.network.management": {
+      "type": "application",
+      "root": "apps/social.network.management",
+      "entryFile": "main",
+      "sourceRoot": "apps/social.network.management/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/social.network.management/tsconfig.app.json"
+      }
+    },
     "test": {
       "type": "application",
       "root": "apps/test",

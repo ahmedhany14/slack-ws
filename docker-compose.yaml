@@ -33,6 +33,23 @@ services:
       - auth
       - postgres
 
+  social-network:
+    image: social-network
+    build:
+      context: .
+      dockerfile: ./apps/social.network.management/Dockerfile
+      target: dev
+    command: pnpm run start:dev social.network.management
+    ports:
+      - '8084:8084'
+    volumes:
+      - .:/app
+    env_file:
+      - .dev.env
+    depends_on:
+      - auth
+      - postgres
+
   test:
     image: test
     build:
