@@ -1,6 +1,7 @@
 import { Column, Entity, OneToMany } from 'typeorm';
 import { AbstractEntity } from '../abstract.entity';
 import { Server } from '@app/database';
+import { Subscribers } from './server.subscribers.entiy';
 
 @Entity('account')
 export class Account extends AbstractEntity<Account> {
@@ -23,4 +24,6 @@ export class Account extends AbstractEntity<Account> {
         lazy: true,
     })
     servers: Promise<Server[]>;
+
+    server_subscribtions: Promise<Subscribers[]>;
 }

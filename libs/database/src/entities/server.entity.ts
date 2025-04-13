@@ -2,6 +2,7 @@ import { Entity, Column, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { AbstractEntity } from '../abstract.entity';
 import { Account } from './account.entity';
 import { Namespaces } from './namespaces.entity';
+import { Subscribers } from './server.subscribers.entiy';
 
 @Entity('server')
 export class Server extends AbstractEntity<Server> {
@@ -37,4 +38,9 @@ export class Server extends AbstractEntity<Server> {
         lazy: true
     })
     namespaces: Promise<Namespaces[]>
+
+    @OneToMany(() => Subscribers, (subscribers) => subscribers.server, {
+        lazy: true
+    })
+    subscribers: Promise<Account[]>;
 }

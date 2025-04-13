@@ -3,12 +3,14 @@ import { LoggerModule } from '@app/logger';
 import { ServerModule } from './server/server.module';
 import { NamespacesModule } from './namespaces/namespaces.module';
 import { FetchServerMiddleware } from './middlewares/fetch.server.middleware';
+import { SubscribersModule } from './subscribers/subscribers.module';
 
 @Module({
     imports: [
         LoggerModule,
         ServerModule,
-        NamespacesModule
+        NamespacesModule,
+        SubscribersModule
     ],
 })
 export class SlackManagementModule implements NestModule {
