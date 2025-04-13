@@ -5,6 +5,7 @@ import { ConfigService } from '@app/config/config.service';
 import { ConfigModule } from '@app/config/config.module';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { Server } from '@app/database/entities/server.entity';
+import { Namespaces } from './entities/namespaces.entity';
 
 @Module({
     imports: [
@@ -26,7 +27,8 @@ import { Server } from '@app/database/entities/server.entity';
         }),
         TypeOrmModule.forFeature([
             Account,
-            Server
+            Server,
+            Namespaces
         ])
     ],
 })

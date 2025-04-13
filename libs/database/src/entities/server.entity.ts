@@ -1,6 +1,7 @@
-import { Entity, Column, JoinColumn, ManyToOne } from 'typeorm';
+import { Entity, Column, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { AbstractEntity } from '../abstract.entity';
 import { Account } from './account.entity';
+import { Namespaces } from './namespaces.entity';
 
 @Entity('server')
 export class Server extends AbstractEntity<Server> {
@@ -31,4 +32,9 @@ export class Server extends AbstractEntity<Server> {
     })
     @JoinColumn({ name: 'owner_id' })
     owner: Account;
+
+    @OneToMany(() => Namespaces, (namespaces) => namespaces.server, {
+        lazy: true
+    })
+    namespaces: Promise<Namespaces[]>
 }
