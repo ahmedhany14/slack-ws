@@ -7,7 +7,6 @@ import { AUTH_SERVICE } from '@app/constants';
 
 import { ServerService } from './server.service';
 import { ServerController } from './server.controller';
-import { FetchServerMiddleware } from './middlewares/fetch.server.middleware';
 
 @Module({
     imports: [
@@ -33,13 +32,6 @@ import { FetchServerMiddleware } from './middlewares/fetch.server.middleware';
     ],
     controllers: [ServerController],
     providers: [ServerService],
+    exports: [ServerService],
 })
-export class ServerModule implements NestModule {
-    configure(consumer: MiddlewareConsumer) {
-        consumer.apply(FetchServerMiddleware).forRoutes({
-            path: 'server/:id',
-            method: RequestMethod.PATCH,
-
-        });
-    }
-}
+export class ServerModule { }

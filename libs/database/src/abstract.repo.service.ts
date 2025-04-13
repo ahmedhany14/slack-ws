@@ -19,7 +19,8 @@ export abstract class AbstractRepoService<T extends AbstractEntity<T>> {
     async create(entity: T): Promise<T> {
         this.logger.log('Creating entity');
         try {
-            return await this.entityRepository.save(entity);
+            const instance = this.entityRepository.create(entity);
+            return await this.entityRepository.save(instance);
         } catch (error) {
             console.log(error);
             throw new InternalServerErrorException({

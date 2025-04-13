@@ -18,6 +18,7 @@ export class Namespaces extends AbstractEntity<Namespaces> {
     @Column({
         type: 'varchar',
         unique: true,
+        nullable: true
     })
     ns_id: string
 
