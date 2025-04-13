@@ -7,7 +7,7 @@ import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { Server } from '@app/database/entities/server.entity';
 import { Namespaces } from './entities/namespaces.entity';
 import { Subscribers } from './entities/server.subscribers.entiy';
-import { FriendsInvitations } from './entities/friendsinvitations.entity';
+import { FriendsInvitations } from './entities/friends.invitations.entity';
 
 @Module({
     imports: [

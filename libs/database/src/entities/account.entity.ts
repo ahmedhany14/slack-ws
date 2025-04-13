@@ -2,7 +2,7 @@ import { Column, Entity, OneToMany } from 'typeorm';
 import { AbstractEntity } from '../abstract.entity';
 import { Server } from '@app/database';
 import { Subscribers } from './server.subscribers.entiy';
-import { FriendsInvitations } from './friendsinvitations.entity';
+import { FriendsInvitations } from './friends.invitations.entity';
 
 @Entity('account')
 export class Account extends AbstractEntity<Account> {
