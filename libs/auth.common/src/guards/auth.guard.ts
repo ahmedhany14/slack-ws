@@ -14,17 +14,14 @@ import { ClientProxy } from '@nestjs/microservices';
 export class AuthGuard implements CanActivate {
     private readonly logger = new Logger(AuthGuard.name);
 
-    constructor(@Inject(AUTH_SERVICE) private readonly authClient: ClientProxy) {}
+    constructor(@Inject(AUTH_SERVICE) private readonly authClient: ClientProxy) { }
 
     canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
         this.logger.log('AuthGuard canActivate called');
+        const request = context.switchToHttp().getRequest();
 
-        const jwt = context.switchToHttp().getRequest().headers.authorization;
-        if (!jwt) {
-            throw new UnauthorizedException('You are not authorized to access this resource');
-        }
-
-        console.log('jwt', jwt)
+        const jwt = request.headers.authorization;
+        if (!jwt) throw new UnauthorizedException('You are not authorized to access this resource');
 
         return this.authClient.send('authenticate', { Authentication: jwt }).pipe(
             tap((response) => {

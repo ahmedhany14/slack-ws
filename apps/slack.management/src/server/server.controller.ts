@@ -11,12 +11,13 @@ import { ServerService } from './server.service';
 // dto
 import { CreateServerDto } from './dtos/create.server.dto';
 import { UpdateServerDto } from './dtos/update.server.dto';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 
-@UseGuards(AuthGuard)
 @Controller('server')
 export class ServerController {
-    constructor(@Inject() private readonly serverService: ServerService) {}
+    constructor(@Inject() private readonly serverService: ServerService) { }
 
+    @UseGuards(AuthGuard)
     @Post()
     async create(@Body() createServerDto: CreateServerDto, @ExtractUserData('id') id: number) {
         console.log(id);
@@ -28,7 +29,7 @@ export class ServerController {
         } as Server);
     }
 
-    @UseGuards(AllowedServerUpdateGuard)
+    @UseGuards(AuthGuard, AllowedServerUpdateGuard)
     @Patch(':id')
     async update(@Body() updateServerDto: UpdateServerDto, @Param('id') id: number) {
         const server = await this.serverService.findOneAndUpdate({ id }, { ...updateServerDto });
@@ -37,5 +38,10 @@ export class ServerController {
             message: 'Server metadata updated successfully',
             server,
         };
+    }
+    @UseGuards(AuthGuard)
+    @MessagePattern('server.get.details')
+    async getServerDetails(@Payload('id') id: number) {
+        return await this.serverService.findOne({ id });
     }
 }
