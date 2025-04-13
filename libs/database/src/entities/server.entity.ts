@@ -26,6 +26,12 @@ export class Server extends AbstractEntity<Server> {
     })
     created_at: Date;
 
+    @Column({
+        type: 'bool',
+        default: true
+    })
+    visable: boolean
+
     @ManyToOne(() => Account, (account) => account.servers, {
         eager: true,
         onDelete: 'CASCADE',

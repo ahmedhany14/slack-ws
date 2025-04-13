@@ -7,6 +7,7 @@ import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { Server } from '@app/database/entities/server.entity';
 import { Namespaces } from './entities/namespaces.entity';
 import { Subscribers } from './entities/server.subscribers.entiy';
+import { FreindsInvitations } from './entities/friendsinvitations.entity';
 
 @Module({
     imports: [
@@ -30,7 +31,8 @@ import { Subscribers } from './entities/server.subscribers.entiy';
             Account,
             Server,
             Namespaces,
-            Subscribers
+            Subscribers,
+            FreindsInvitations,
         ])
     ],
 })

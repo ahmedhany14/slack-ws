@@ -13,7 +13,7 @@ enum subscriberRole {
 @Entity('subscribers')
 export class Subscribers extends AbstractEntity<Subscribers> {
 
-
+    
     @ManyToOne(() => Account, (account) => account.server_subscribtions, {
         eager: true,
         onDelete: 'CASCADE',    
