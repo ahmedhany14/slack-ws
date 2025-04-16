@@ -31,30 +31,9 @@ export class FriendsController {
      */
     @Get('all-friends')
     async getAllFriends(@ExtractUserData('id') user_id: number) {
-        console.log('getAllFriends');
+        console.log('get All Friends of user_id = ', user_id);
 
-        const friends_i_send_to_them = await this.friendsService.find({
-            sender: { id: user_id },
-            request_status: RequestStatus.ACCEPTED,
-        });
-
-        const friends_i_receive_from_them = await this.friendsService.find({
-            receiver: { id: user_id },
-            request_status: RequestStatus.ACCEPTED,
-        });
-
-        const friends = [
-            ...friends_i_send_to_them.map((friend) => ({
-                id: friend.receiver.id,
-                name: friend.receiver.username,
-            })),
-            ...friends_i_receive_from_them.map((friend) => ({
-                id: friend.sender.id,
-                name: friend.sender.username,
-            })),
-        ];
-
-        return friends;
+        return this.friendsService.getMyFriends(user_id);
     }
 
     /**
