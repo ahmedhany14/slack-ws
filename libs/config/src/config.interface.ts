@@ -10,6 +10,7 @@ export interface authConfig {
     expiresIn: number;
 }
 
+
 export interface dbConfig {
     type: string;
     host: string;
@@ -32,10 +33,17 @@ export interface socialNetworkManagementConfig {
     tcpPort: number;
 }
 
+export interface realTimeConfig {
+    hostname: string;
+    httpPort: number;
+    tcpPort: number;
+}
+
 export interface Config {
     authApp: authAppConfig;
     authConfig: authConfig;
     dbConfig: dbConfig;
     slackConfig: slackManagementConfig;
     socialNetworkConfig: socialNetworkManagementConfig;
+    realTimeConfig: realTimeConfig;
 }

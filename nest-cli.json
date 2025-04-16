@@ -82,6 +82,15 @@
         "tsConfigPath": "libs/logger/tsconfig.lib.json"
       }
     },
+    "realtime-ws": {
+      "type": "application",
+      "root": "apps/realtime-ws",
+      "entryFile": "main",
+      "sourceRoot": "apps/realtime-ws/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/realtime-ws/tsconfig.app.json"
+      }
+    },
     "slack.management": {
       "type": "application",
       "root": "apps/slack.management",

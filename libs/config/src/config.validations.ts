@@ -6,7 +6,7 @@ export default Joi.object({
     // auth app
     AUTH_HTTP_PORT: Joi.number().default(8080),
     AUTH_TCP_PORT: Joi.number().default(8081),
-    AUTH_HOSTNAME: Joi.string().default('auth'),
+    AUTH_HOSTNAME: Joi.string().required(),
     AUTH_JWT_SECRET: Joi.string().required(),
     AUTH_JWT_EXPIRE_IN: Joi.number().required().integer(),
 
@@ -20,15 +20,17 @@ export default Joi.object({
     PGADMIN_DEFAULT_PASSWORD: Joi.string().required(),
 
     // slack
-    SLACK_HOSTNAME: Joi.string().default('slack'),
+    SLACK_HOSTNAME: Joi.string().required(),
     SLACK_HTTP_PORT: Joi.number().default(8082),
     SLACK_TCP_PORT: Joi.number().default(8083),
 
-
     // social network
-    SOCIAL_NETWORK_HOSTNAME: Joi.string().default('social-network'),
+    SOCIAL_NETWORK_HOSTNAME: Joi.string().required(),
     SOCIAL_NETWORK_HTTP_PORT: Joi.number().default(8084),
     SOCIAL_NETWORK_TCP_PORT: Joi.number().default(8085),
 
-
+    // real time
+    REALTIME_HOSTNAME: Joi.string().default('realtime'),
+    REALTIME_HTTP_PORT: Joi.number().default(8086),
+    REALTIME_TCP_PORT: Joi.number().default(8087),
 });

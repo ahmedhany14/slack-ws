@@ -50,6 +50,25 @@ services:
       - auth
       - postgres
 
+  realtime:
+    image: realtime
+    build:
+      context: .
+      dockerfile: ./apps/realtime-ws/Dockerfile
+      target: dev
+    command: pnpm run start:dev realtime-ws
+    ports:
+      - '8086:8086'
+    volumes:
+      - .:/app
+    env_file:
+      - .dev.env
+    depends_on:
+      - auth
+      - postgres
+      - slack
+      - social-network
+
   test:
     image: test
     build:
@@ -63,6 +82,7 @@ services:
       - .:/app
     depends_on:
       - auth
+
   postgres:
     image: postgres:13
     container_name: postgres_db

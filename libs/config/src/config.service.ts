@@ -25,4 +25,8 @@ export class ConfigService {
     get socialNetworkConfig(): Config['socialNetworkConfig'] | undefined {
         return this.nestConfigService.get<Config['socialNetworkConfig']>('socialNetworkConfig');
     }
+
+    get realTimeConfig(): Config['realTimeConfig'] | undefined {
+        return this.nestConfigService.get<Config['realTimeConfig']>('realTimeConfig');
+    }
 }

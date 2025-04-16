@@ -20,7 +20,7 @@ export default (): Config => ({
         database: process.env.POSTGRES_DB || 'slack_ws_db',
         synchronize: process.env.DB_SYNC === 'true' || false,
     },
-    slackConfig:{
+    slackConfig: {
         hostname: process.env.SLACK_HOSTNAME || 'slack',
         httpPort: parseInt(process.env.SLACK_HTTP_PORT || '8082', 10),
         tcpPort: parseInt(process.env.SLACK_TCP_PORT || '8083', 10),
@@ -30,5 +30,11 @@ export default (): Config => ({
         hostname: process.env.SOCIAL_NETWORK_HOSTNAME || 'social-network',
         httpPort: parseInt(process.env.SOCIAL_NETWORK_HTTP_PORT || '8084', 10),
         tcpPort: parseInt(process.env.SOCIAL_NETWORK_TCP_PORT || '8085', 10),
+    },
+
+    realTimeConfig: {
+        hostname: process.env.REALTIME_HOSTNAME || 'realtime',
+        httpPort: parseInt(process.env.REALTIME_HTTP_PORT || '8086', 10),
+        tcpPort: parseInt(process.env.REALTIME_TCP_PORT || '8087', 10),
     },
 });
