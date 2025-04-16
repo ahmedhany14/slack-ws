@@ -13,13 +13,13 @@ import { ClientProxy } from '@nestjs/microservices';
 import { RequestI } from '@app/interfaces';
 
 @Injectable()
-export class IsExistUserGuard implements CanActivate {
-    private readonly logger = new Logger(IsExistUserGuard.name);
+export class IsExistReceiverGuard implements CanActivate {
+    private readonly logger = new Logger(IsExistReceiverGuard.name);
 
     constructor(@Inject(AUTH_SERVICE) private readonly authClient: ClientProxy) { }
 
     canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
-        console.log('IsExistUserGuard');
+        console.log('IsExistReceiverGuard');
 
         const request: RequestI = context.switchToHttp().getRequest();
 

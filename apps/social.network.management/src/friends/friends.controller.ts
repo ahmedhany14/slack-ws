@@ -13,7 +13,7 @@ import {
 import { FriendsService } from './friends.service';
 import { AuthGuard } from '@app/auth.common';
 import { ExtractUserData } from '@app/decorators';
-import { IsExistUserGuard } from '@app/auth.common/guards/is.exist.user.guard';
+import { IsExistReceiverGuard } from '@app/auth.common/guards/is.exist.receiver.guard';
 import { FriendsInvitations, RequestStatus } from '@app/database';
 
 @UseGuards(AuthGuard)
@@ -69,7 +69,7 @@ export class FriendsController {
      * @throws NotFoundException if the receiver_id does not exist
      * @throws InternalServerErrorException if there is an error while creating the friend request
      */
-    @UseGuards(IsExistUserGuard)
+    @UseGuards(IsExistReceiverGuard)
     @Post('send-friend-request/:receiver_id')
     async addFriend(
         @ExtractUserData('id') sender_id: number,
