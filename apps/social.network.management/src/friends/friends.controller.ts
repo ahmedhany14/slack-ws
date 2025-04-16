@@ -42,7 +42,19 @@ export class FriendsController {
             receiver: { id: user_id },
             request_status: RequestStatus.ACCEPTED,
         });
-        return [...friends_i_send_to_them, ...friends_i_receive_from_them];
+
+        const friends = [
+            ...friends_i_send_to_them.map((friend) => ({
+                id: friend.receiver.id,
+                name: friend.receiver.username,
+            })),
+            ...friends_i_receive_from_them.map((friend) => ({
+                id: friend.sender.id,
+                name: friend.sender.username,
+            })),
+        ];
+
+        return friends;
     }
 
     /**
@@ -196,6 +208,13 @@ export class FriendsController {
         };
     }
 
+    /**
+     * Function to remove a friend
+     * @param user_id user id who wants to remove the friend
+     * @param friend_id friend id to be removed
+     * @returns Response with the updated friend request, state => removed
+     * @throws InternalServerErrorException if there is an error while removing the friend
+     */
     @Delete('remove-friend/:friend_id')
     async removeFriend(
         @ExtractUserData('id') user_id: number,
@@ -203,11 +222,16 @@ export class FriendsController {
     ) {
         console.log('removeFriend where user_id = ', user_id, ' and friend_id = ', friend_id);
 
-        await this.friendsService.findOneAndDelete({
-            sender: { id: user_id },
-            receiver: { id: friend_id },
-            request_status: RequestStatus.ACCEPTED,
-        });
+        await this.friendsService.findOneAndUpdate(
+            {
+                sender: { id: user_id },
+                receiver: { id: friend_id },
+                request_status: RequestStatus.ACCEPTED,
+            },
+            {
+                request_status: RequestStatus.REMOVED,
+            },
+        );
 
         return {
             message: 'Friend removed',
