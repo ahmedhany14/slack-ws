@@ -14,16 +14,4 @@ export class FriendsService extends AbstractRepoService<FriendsInvitations> {
     ) {
         super(friendsInvitationsRepository);
     }
-
-    async addFriend(
-        sender_id: number,
-        receiver_id: number
-    ) {
-        const friend_request = await this.create({
-            sender: { id: sender_id },
-            receiver: { id: receiver_id }
-        } as FriendsInvitations);
-
-        return friend_request;
-    }
 }

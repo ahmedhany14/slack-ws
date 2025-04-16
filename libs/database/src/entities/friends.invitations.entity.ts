@@ -1,12 +1,13 @@
-import { Entity, ManyToOne, JoinColumn, Column } from 'typeorm';
+import { Entity, ManyToOne, JoinColumn, Column, Unique } from 'typeorm';
 import { AbstractEntity } from '../abstract.entity';
 import { Account } from './account.entity';
 
 
-enum RequestStatus {
+export enum RequestStatus {
     PENDING = 'pending',
     ACCEPTED = 'accepted',
-    REJECTED = 'rejected'
+    REJECTED = 'rejected',
+    REMOVED = 'removed'
 }
 
 /**
