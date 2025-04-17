@@ -1,4 +1,4 @@
-FROM node:alpine as dev
+FROM node:18-slim as dev
 
 WORKDIR /app
 
@@ -16,7 +16,7 @@ COPY libs libs
 
 RUN pnpm run build social.network.management
 
-FROM node:alpine as prod
+FROM node:18-slim as prod
 
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}

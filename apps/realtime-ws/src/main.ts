@@ -3,6 +3,7 @@ import { RealtimeWsModule } from './realtime-ws.module';
 import { Transport } from '@nestjs/microservices';
 import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
+import { WsDmsAdapter } from './dms/ws.dms.adapter';
 
 async function bootstrap() {
     const app = await NestFactory.create(RealtimeWsModule);
@@ -28,6 +29,12 @@ async function bootstrap() {
             forbidNonWhitelisted: true,
         }),
     );
+
+    // adapters
+    app.useWebSocketAdapter(new WsDmsAdapter());
+
+
+
 
     await app.startAllMicroservices().then(() => {
         console.log('Realtime microservice is running');
