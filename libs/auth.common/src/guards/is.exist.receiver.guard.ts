@@ -25,11 +25,11 @@ export class IsExistReceiverGuard implements CanActivate {
 
         const receiver_id = +request.params.receiver_id;
 
-        console.log('reciver_id', receiver_id);
+        console.log('receiver_id', receiver_id);
 
         return this.authClient
             .send('is-exist-account', {
-                receiver_id
+                id: receiver_id
             })
             .pipe(
                 tap((response) => {

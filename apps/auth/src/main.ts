@@ -1,7 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AuthModule } from './auth.module';
 import * as cookieParser from 'cookie-parser';
-import { Logger } from 'nestjs-pino';
 import { Transport } from '@nestjs/microservices';
 import { ValidationPipe } from '@nestjs/common';
 
@@ -30,7 +29,6 @@ async function bootstrap() {
             forbidNonWhitelisted: true,
         }),
     );
-    app.useLogger(app.get(Logger));
     await app.startAllMicroservices().then(() => {
         console.log('Auth microservice is running');
     })

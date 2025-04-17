@@ -34,7 +34,6 @@ async function bootstrap() {
         }),
     );
 
-    app.useLogger(app.get(Logger));
 
     await app.startAllMicroservices().then(() => {
         console.log('Social Network microservice is running');

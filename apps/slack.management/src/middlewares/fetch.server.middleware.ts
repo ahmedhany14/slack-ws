@@ -9,9 +9,10 @@ export class FetchServerMiddleware implements NestMiddleware {
     constructor(private readonly serverService: ServerService) { }
 
     async use(req: RequestI, res: any, next: () => void) {
-        console.log('FetchServerMiddleware');
         const id = +req.params.id;
-        console.log('id', id, req.params);
+
+        this.logger.log('FetchServerMiddleware use called, id: ', id);
+
         const server = await this.serverService.findOne({ id });
         if (!server) throw new NotFoundException('Server not found');
         req.server = server;

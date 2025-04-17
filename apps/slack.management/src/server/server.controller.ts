@@ -1,4 +1,4 @@
-import { Body, Controller, Inject, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Inject, Logger, Param, Patch, Post, UseGuards } from '@nestjs/common';
 
 // libraries
 import { AllowedServerUpdateGuard, AuthGuard } from '@app/auth.common';
@@ -15,12 +15,14 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 
 @Controller('server')
 export class ServerController {
-    constructor(@Inject() private readonly serverService: ServerService) { }
+    private readonly logger: Logger = new Logger(ServerController.name);
+
+    constructor(@Inject() private readonly serverService: ServerService) {}
 
     @UseGuards(AuthGuard)
     @Post()
     async create(@Body() createServerDto: CreateServerDto, @ExtractUserData('id') id: number) {
-        console.log(id);
+        this.logger.log(`creating server, id: ${id}`);
 
         return await this.serverService.create({
             name: createServerDto.name,
@@ -32,6 +34,8 @@ export class ServerController {
     @UseGuards(AuthGuard, AllowedServerUpdateGuard)
     @Patch(':id')
     async update(@Body() updateServerDto: UpdateServerDto, @Param('id') id: number) {
+        this.logger.log(`updating server, id: ${id}`);
+
         const server = await this.serverService.findOneAndUpdate({ id }, { ...updateServerDto });
 
         return {
@@ -39,9 +43,12 @@ export class ServerController {
             server,
         };
     }
+
     @UseGuards(AuthGuard)
     @MessagePattern('server.get.details')
     async getServerDetails(@Payload('id') id: number) {
+        this.logger.log(`getting server details, id: ${id}`);
+
         return await this.serverService.findOne({ id });
     }
 }

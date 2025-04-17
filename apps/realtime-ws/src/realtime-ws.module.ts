@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
-import { LoggerModule } from '@app/logger';
 
 @Module({
-    imports: [LoggerModule],
+    imports: [],
 })
 export class RealtimeWsModule {}

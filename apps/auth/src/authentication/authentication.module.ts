@@ -6,7 +6,6 @@ import { JwtModule } from '@nestjs/jwt';
 
 // libraries
 import { ConfigModule } from '@app/config/config.module';
-import { LoggerModule } from '@app/logger';
 import { DatabaseModule } from '@app/database';
 
 // module controllers and services
@@ -17,7 +16,7 @@ import { TokenProvider } from './providers/token.provider';
 
 
 @Module({
-    imports: [ConfigModule, LoggerModule, DatabaseModule, AccountModule, JwtModule],
+    imports: [ConfigModule, DatabaseModule, AccountModule, JwtModule],
     controllers: [AuthenticationController],
     providers: [AuthenticationService, BcryptProvider, TokenProvider],
     exports: [],

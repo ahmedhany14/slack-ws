@@ -2,6 +2,7 @@ import {
     CanActivate,
     ExecutionContext,
     Injectable,
+    Logger,
     NotFoundException,
     UnauthorizedException,
 } from '@nestjs/common';
@@ -10,7 +11,11 @@ import { RequestI } from '@app/interfaces';
 
 @Injectable()
 export class AllowToUpdateGuard implements CanActivate {
+    private readonly logger = new Logger(AllowToUpdateGuard.name);
+
     canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
+        this.logger.log('AllowToUpdateGuard canActivate called');
+
         const request: RequestI = context.switchToHttp().getRequest();
 
         const owner_id = +request.user.id,
@@ -19,6 +24,9 @@ export class AllowToUpdateGuard implements CanActivate {
         if (!server) throw new NotFoundException('server not founded');
         if (server.owner.id !== owner_id)
             throw new UnauthorizedException('You are not allowed to update this server');
+
+        this.logger.log('server found and owner is valid');
+
         return true;
     }
 }

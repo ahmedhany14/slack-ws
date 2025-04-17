@@ -4,6 +4,7 @@ import {
     Delete,
     Get,
     Inject,
+    Logger,
     Param,
     ParseIntPipe,
     Patch,
@@ -19,6 +20,8 @@ import { FriendsInvitations, RequestStatus } from '@app/database';
 @UseGuards(AuthGuard)
 @Controller('friends')
 export class FriendsController {
+    private readonly logger: Logger = new Logger(FriendsController.name);
+
     constructor(
         @Inject()
         private readonly friendsService: FriendsService,
@@ -31,7 +34,7 @@ export class FriendsController {
      */
     @Get('all-friends')
     async getAllFriends(@ExtractUserData('id') user_id: number) {
-        console.log('get All Friends of user_id = ', user_id);
+        console.log('getAllFriends of user_id = ', user_id);
 
         return this.friendsService.getMyFriends(user_id);
     }
@@ -43,7 +46,7 @@ export class FriendsController {
      */
     @Get('pending-friend-requests')
     async getPendingFriendRequests(@ExtractUserData('id') user_id: number) {
-        console.log('getPendingFriendRequests of user_id = ', user_id);
+        this.logger.log('getPendingFriendRequests of user_id = ', user_id);
 
         return this.friendsService.find({
             sender: { id: user_id },
@@ -66,7 +69,12 @@ export class FriendsController {
         @ExtractUserData('id') sender_id: number,
         @Param('receiver_id', ParseIntPipe) receiver_id: number,
     ) {
-        console.log('addFriend where sender_id = ', sender_id, ' and receiver_id = ', receiver_id);
+        this.logger.log(
+            `addFriend where sender_id = `,
+            sender_id,
+            ' and receiver_id = ',
+            receiver_id,
+        );
 
         if (sender_id === receiver_id) {
             throw new ConflictException('You cannot send a friend request to yourself');
@@ -105,8 +113,8 @@ export class FriendsController {
         @ExtractUserData('id') receiver_id: number,
         @Param('sender_id', ParseIntPipe) sender_id: number,
     ) {
-        console.log(
-            'acceptFriendRequest where sender_id = ',
+        this.logger.log(
+            `acceptFriendRequest where sender_id = `,
             sender_id,
             ' and receiver_id = ',
             receiver_id,
@@ -141,8 +149,8 @@ export class FriendsController {
         @ExtractUserData('id') receiver_id: number,
         @Param('sender_id', ParseIntPipe) sender_id: number,
     ) {
-        console.log(
-            'rejectFriendRequest where sender_id = ',
+        this.logger.log(
+            `rejectFriendRequest where sender_id = `,
             sender_id,
             ' and receiver_id = ',
             receiver_id,
@@ -169,8 +177,8 @@ export class FriendsController {
         @ExtractUserData('id') sender_id: number,
         @Param('receiver_id', ParseIntPipe) receiver_id: number,
     ) {
-        console.log(
-            'cancelFriendRequest where sender_id = ',
+        this.logger.log(
+            `cancelFriendRequest where sender_id = `,
             sender_id,
             ' and receiver_id = ',
             receiver_id,
@@ -199,8 +207,7 @@ export class FriendsController {
         @ExtractUserData('id') user_id: number,
         @Param('friend_id', ParseIntPipe) friend_id: number,
     ) {
-        console.log('removeFriend where user_id = ', user_id, ' and friend_id = ', friend_id);
-
+        this.logger.log(`removeFriend where user_id = `, user_id, ' and friend_id = ', friend_id);
         await this.friendsService.findOneAndUpdate(
             {
                 sender: { id: user_id },

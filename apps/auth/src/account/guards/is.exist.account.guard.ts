@@ -1,31 +1,29 @@
-import { CanActivate, ExecutionContext, Inject, Injectable } from '@nestjs/common';
-import { Observable } from 'rxjs';
+import { CanActivate, ExecutionContext, Inject, Injectable, Logger } from '@nestjs/common';
 import { AccountService } from '../account.service';
 
 @Injectable()
 export class IsExistAccountGuard implements CanActivate {
+    private readonly logger = new Logger(IsExistAccountGuard.name);
 
     constructor(
         @Inject()
-        private readonly accountService: AccountService
-    ) {
-    }
+        private readonly accountService: AccountService,
+    ) {}
 
-    async canActivate(
-        context: ExecutionContext,
-    ): Promise<boolean> {
-        console.log('IsExistAccountGuard');
+    async canActivate(context: ExecutionContext): Promise<boolean> {
+        this.logger.log('is exist account Guard canActivate called');
 
         const request = context.switchToHttp().getRequest();
-        const { receiver_id } = request;
+        const { id } = request;
 
-        const account = await this.accountService.findOne({ id: receiver_id });
+        const account = await this.accountService.findOne({ id });
 
         if (!account) {
-            console.log('reciver not found');
+            this.logger.log('account not found');
             return false;
         }
 
+        this.logger.log('account found');
         return true;
     }
 }

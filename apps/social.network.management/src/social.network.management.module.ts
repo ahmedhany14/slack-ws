@@ -4,7 +4,6 @@ import { FriendsModule } from './friends/friends.module';
 
 @Module({
     imports: [
-        LoggerModule,
         FriendsModule,
     ],
 })

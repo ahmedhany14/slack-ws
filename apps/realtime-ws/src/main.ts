@@ -2,7 +2,6 @@ import { NestFactory } from '@nestjs/core';
 import { RealtimeWsModule } from './realtime-ws.module';
 import { Transport } from '@nestjs/microservices';
 import { ValidationPipe } from '@nestjs/common';
-import { Logger } from 'nestjs-pino';
 import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
@@ -29,7 +28,6 @@ async function bootstrap() {
             forbidNonWhitelisted: true,
         }),
     );
-    app.useLogger(app.get(Logger));
 
     await app.startAllMicroservices().then(() => {
         console.log('Realtime microservice is running');

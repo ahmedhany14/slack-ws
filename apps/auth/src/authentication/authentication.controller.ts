@@ -37,6 +37,7 @@ export class AuthenticationController {
     @UseGuards(JwtVerifyGuard)
     @MessagePattern('authenticate')
     async authenticate(@Payload() payload: RequestI) {
+        this.logger.log(`user authenticated, payload: `, payload);
         return payload.user;
     }
 }
