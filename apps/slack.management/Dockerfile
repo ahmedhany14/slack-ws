@@ -1,5 +1,7 @@
 FROM node:18-slim as dev
 
+RUN apt-get update && apt-get install -y procps && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 COPY package.json ./
@@ -18,8 +20,10 @@ RUN pnpm run build slack.management
 
 FROM node:18-slim as prod
 
+
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
+RUN apt-get update && apt-get install -y procps && rm -rf /var/lib/apt/lists/*
 
 
 WORKDIR /app

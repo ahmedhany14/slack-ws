@@ -59,6 +59,7 @@ services:
     command: pnpm run start:dev realtime-ws
     ports:
       - '8086:8086'
+      - '3001:3001' # For dms
     volumes:
       - .:/app
     env_file:

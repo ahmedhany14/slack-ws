@@ -34,8 +34,6 @@ async function bootstrap() {
     app.useWebSocketAdapter(new WsDmsAdapter());
 
 
-
-
     await app.startAllMicroservices().then(() => {
         console.log('Realtime microservice is running');
     });

@@ -1,17 +1,14 @@
 import { IoAdapter } from '@nestjs/platform-socket.io';
-import { ServerOptions } from 'socket.io';
+import { ServerOptions, Socket } from 'socket.io';
 import { Server } from 'socket.io';
+import { Logger } from '@nestjs/common';
 
 export class WsDmsAdapter extends IoAdapter {
+    private readonly logger: Logger = new Logger(WsDmsAdapter.name);
+
     createIOServer(port: number, options?: ServerOptions): Server {
-        const serverOptions: {
-            path: string;
-            cors: { origin: string; methods: string[]; credentials: boolean };
-            allowEIO3: boolean;
-            transports: string[];
-        } = {
+        const Options = {
             ...options,
-            path: options?.path || '/socket.io',
             cors: {
                 origin: '*',
                 methods: ['GET', 'POST'],
@@ -20,13 +17,11 @@ export class WsDmsAdapter extends IoAdapter {
             allowEIO3: true,
             transports: ['websocket', 'polling'],
         };
-
-        const server = super.createIOServer(port, serverOptions);
-        server.of('/dms').use((socket, next) => {
-            console.log('Socket connected to /dms namespace');
+        const server: Server = super.createIOServer(port, Options);
+        server.of('/dms').use((socket: Socket, next) => {
+            this.logger.log('Socket connected to /dms namespace');
             return next();
         });
-
         return server;
     }
 }

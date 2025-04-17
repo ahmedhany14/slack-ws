@@ -8,7 +8,7 @@ import {
 import { Socket } from 'socket.io';
 
 @WebSocketGateway(3001, {
-    namespace: 'dms',
+    namespace: '/dms',
     cors: {
         origin: '*',
         methods: ['GET', 'POST'],
@@ -21,11 +21,6 @@ import { Socket } from 'socket.io';
 })
 export class DmsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly logger = new Logger(DmsGateway.name);
-
-    @SubscribeMessage('message')
-    handleMessage(client: any, payload: any): string {
-        return 'Hello world!';
-    }
 
     async handleConnection(client: Socket) {
         this.logger.log(`Client connected: ${client.id}`);
