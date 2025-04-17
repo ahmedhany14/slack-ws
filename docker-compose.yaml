@@ -96,6 +96,16 @@ services:
   pgadmin:
     image: dpage/pgadmin4
     container_name: pgadmin
+    command: >
+      bash -c "
+        mkdir -p /var/log/pgadmin
+        exec /entrypoint.sh 2>/dev/null
+      "
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10k"
+        max-file: "1"
     restart: always
     ports:
       - '5050:80'

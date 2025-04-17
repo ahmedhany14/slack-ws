@@ -34,9 +34,33 @@ export class FriendsController {
      */
     @Get('all-friends')
     async getAllFriends(@ExtractUserData('id') user_id: number) {
-        console.log('getAllFriends of user_id = ', user_id);
+        this.logger.log('getAllFriends of user_id = ', user_id);
 
         return this.friendsService.getMyFriends(user_id);
+    }
+
+    /**
+     * Function to get all friends invitations of a user (sent to the user)
+     * @param user_id
+     * @return List of friends invitations
+     */
+    @Get('all-friends-invitations')
+    async getAllFriendsInvitations(@ExtractUserData('id') user_id: number) {
+        this.logger.log('getAllFriendsInvitations of user_id = ', user_id);
+
+        const friends_invitations = await this.friendsService.find({
+            receiver: { id: user_id },
+            request_status: RequestStatus.PENDING,
+        } as FriendsInvitations);
+
+        return friends_invitations.map((invitation) => ({
+            id: invitation.id,
+            sender: {
+                id: invitation.sender.id,
+                username: invitation.sender.username,
+            },
+            request_status: invitation.request_status,
+        }));
     }
 
     /**
@@ -94,6 +118,16 @@ export class FriendsController {
             request_status: RequestStatus.PENDING,
         } as FriendsInvitations);
         if (is_pending) throw new ConflictException('You already sent a friend request');
+
+        const is_receiver_sent = await this.friendsService.findOne({
+            sender: { id: receiver_id },
+            receiver: { id: sender_id },
+            request_status: RequestStatus.PENDING,
+        } as FriendsInvitations);
+
+        if (is_receiver_sent) {
+            throw new ConflictException('You already received a friend request from this user');
+        }
 
         return this.friendsService.create({
             sender: { id: sender_id },
