@@ -17,8 +17,7 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 export class ServerController {
     private readonly logger: Logger = new Logger(ServerController.name);
 
-    constructor(@Inject() private readonly serverService: ServerService) { }
-
+    constructor(@Inject() private readonly serverService: ServerService) {}
 
     /**
      * Endpoint to create a new servers.
@@ -27,68 +26,83 @@ export class ServerController {
      * @param id owner of the servers
      * @returns the created servers
      */
+
+    /**
+     * Creates a new server using the provided data and user id.
+     *
+     * @param {CreateServerDto} createServerDto - The DTO containing the server creation details, such as name and description.
+     * @param {number} id - The ID of the user creating the server, extracted from the user data.
+     * @returns {Promise<{ response: { server: Server } }>} - A promise that resolves to an object containing the created server.
+     */
     @UseGuards(AuthGuard)
     @Post()
-    async create(@Body() createServerDto: CreateServerDto, @ExtractUserData('id') id: number) {
+    async create(
+        @Body() createServerDto: CreateServerDto,
+        @ExtractUserData('id') id: number,
+    ): Promise<{
+        response: {
+            server: Server;
+        };
+    }> {
         this.logger.log(`creating server, id: ${id}`);
 
-        return await this.serverService.create({
+        const server = await this.serverService.create({
             name: createServerDto.name,
             description: createServerDto.description,
             owner: { id },
         } as Server);
-    }
-
-    /**
-     * Endpoint to update a servers.
-     * Only the owner of the servers can update it.
-     * This endpoint is protected by authentication and authorization guards.
-     * User should be allowed to update the servers only if he is the owner of the servers or he is an admin on this servers
-     * @param updateServerDto data to update the servers
-     * @param id id of the servers to update
-     * @returns the updated servers
-     */
-    @UseGuards(AuthGuard, AllowedServerUpdateGuard)
-    @Patch(':id')
-    async update(@Body() updateServerDto: UpdateServerDto, @Param('id') id: number) {
-        this.logger.log(`updating server, id: ${id}`);
-
-        const server = await this.serverService.findOneAndUpdate({ id }, { ...updateServerDto });
 
         return {
-            message: 'Server metadata updated successfully',
-            server,
+            response: {
+                server,
+            },
         };
     }
 
-    // TODO: create a new endpoint to send an invetation to the users to join the servers
+    // TODO: add is existing server decorator to check if the server exists, in body
+    /**
+     * Updates server metadata based on the given ID and input data.
+     *
+     * @param {UpdateServerDto} updateServerDto - The data transfer object containing the updated server information.
+     * @param {number} server_id - The unique identifier of the server to be updated.
+     * @returns {Promise<{ response: { server: Server } }>} - A promise that resolves to an object containing the updated server.
+     */
+    @UseGuards(AuthGuard, AllowedServerUpdateGuard)
+    @Patch(':server_id')
+    async update(
+        @Body() updateServerDto: UpdateServerDto,
+        @Param('server_id') server_id: number,
+    ): Promise<{
+        response: {
+            server: Server;
+        };
+    }> {
+        this.logger.log(`updating server, id: ${server_id}`);
+
+        const server = await this.serverService.findOneAndUpdate(
+            {
+                id: server_id,
+            },
+            { ...updateServerDto },
+        ) as Server;
+
+        return {
+            response: {
+                server,
+            },
+        };
+    }
+
+    // TODO: create a new endpoint to send an invitation to the users to join the servers
     /**
      * Endpoint to send an invitation to a user to join the servers.
      * This endpoint is protected by authentication and authorization guards.
      * User should be allowed to send an invitation, based on the servers role, (owner, admin only) or any user
-     * Check if user is already existing 
+     * Check if user is already existing
      * Check if user is already a member of the servers
      * Check if user is already invited to the servers
      * @param id id of the servers to send the invitation to
      * @param user_id id of the user to send the invitation to
      * @returns the invitation
      */
-
-
-    /**
-     * Message pattern to get servers details.
-     * This is a microservice pattern.
-     * This endpoint is protected by authentication and authorization guards.
-     * User should be member of the servers to get all namespaces on this servers
-     * @param id id of the servers to get details
-     * @returns the servers details
-     */
-    // TODO: add another auth guard to check if the user is a member of the servers
-    @UseGuards(AuthGuard)
-    @MessagePattern('servers.get.details')
-    async getServerDetails(@Payload('id') id: number) {
-        this.logger.log(`getting server details, id: ${id}`);
-
-        return await this.serverService.findOne({ id });
-    }
 }
