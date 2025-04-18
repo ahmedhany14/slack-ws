@@ -19,10 +19,10 @@ services:
     image: slack
     build:
       context: .
-      dockerfile: ./apps/slack.management/Dockerfile
+      dockerfile: apps/slack/Dockerfile
       target: dev
 
-    command: pnpm run start:dev slack.management
+    command: pnpm run start:dev slack
     ports:
       - '8082:8082'
     volumes:
@@ -32,57 +32,6 @@ services:
     depends_on:
       - auth
       - postgres
-
-  social-network:
-    image: social-network
-    build:
-      context: .
-      dockerfile: ./apps/social.network.management/Dockerfile
-      target: dev
-    command: pnpm run start:dev social.network.management
-    ports:
-      - '8084:8084'
-    volumes:
-      - .:/app
-    env_file:
-      - .dev.env
-    depends_on:
-      - auth
-      - postgres
-
-  realtime:
-    image: realtime
-    build:
-      context: .
-      dockerfile: ./apps/realtime-ws/Dockerfile
-      target: dev
-    command: pnpm run start:dev realtime-ws
-    ports:
-      - '8086:8086'
-      - '3001:3001' # For dms
-    volumes:
-      - .:/app
-    env_file:
-      - .dev.env
-    depends_on:
-      - auth
-      - postgres
-      - slack
-      - social-network
-
-  test:
-    image: test
-    build:
-      context: .
-      dockerfile: ./apps/test/Dockerfile
-      target: dev
-    command: pnpm run start:dev test
-    ports:
-      - '4040:4040'
-    volumes:
-      - .:/app
-    depends_on:
-      - auth
 
   postgres:
     image: postgres:13

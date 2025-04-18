@@ -21,12 +21,4 @@ export class ConfigService {
     get slackConfig(): Config['slackConfig'] | undefined {
         return this.nestConfigService.get<Config['slackConfig']>('slackConfig');
     }
-
-    get socialNetworkConfig(): Config['socialNetworkConfig'] | undefined {
-        return this.nestConfigService.get<Config['socialNetworkConfig']>('socialNetworkConfig');
-    }
-
-    get realTimeConfig(): Config['realTimeConfig'] | undefined {
-        return this.nestConfigService.get<Config['realTimeConfig']>('realTimeConfig');
-    }
 }

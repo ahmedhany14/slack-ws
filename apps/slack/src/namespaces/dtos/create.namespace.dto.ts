@@ -14,5 +14,4 @@ export class CreateNamespaceDto {
     @IsNotEmpty()
     @MaxLength(32)
     name: string;
-x
 }

@@ -1,14 +1,11 @@
 import { NestFactory } from '@nestjs/core';
-import * as cookieParser from 'cookie-parser';
-import { Logger } from 'nestjs-pino';
+import { SlackModule } from './slack.module';
 import { Transport } from '@nestjs/microservices';
 import { ValidationPipe } from '@nestjs/common';
-
-import { SlackManagementModule } from './slack.management.module';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
-    const app = await NestFactory.create(SlackManagementModule);
-
+    const app = await NestFactory.create(SlackModule);
     app.connectMicroservice({
         transport: Transport.TCP,
         options: {
@@ -48,5 +45,4 @@ slack service is running on port ${process.env.SLACK_HTTP_PORT ?? 3000}
 logic: ${process.env.SLACK_SERVICE_URL ?? `http://${process.env.SLACK_HOSTNAME}:${process.env.SLACK_HTTP_PORT ?? 3000}`}
 microservice: on port ${process.env.SLACK_TCP_PORT ?? 3001}
 `);
-
 });

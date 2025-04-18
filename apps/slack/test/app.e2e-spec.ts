@@ -1,14 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { RealtimeWsModule } from './../src/realtime-ws.module';
+import { SlackModule } from './../src/slack.module';
 
-describe('RealtimeWsController (e2e)', () => {
+describe('SlackController (e2e)', () => {
   let app: INestApplication;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [RealtimeWsModule],
+      imports: [SlackModule],
     }).compile();
 
     app = moduleFixture.createNestApplication();

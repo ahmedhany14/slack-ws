@@ -1,5 +1,5 @@
-import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
-import { catchError, first, map, tap } from 'rxjs';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import { catchError, first, map } from 'rxjs';
 
 import { AUTH_SERVICE } from '@app/constants';
 import { ClientProxy } from '@nestjs/microservices';
@@ -11,10 +11,8 @@ import { IWsAuthenticateRequest } from '@app/auth.common';
 export class RealtimeWsAuthService {
     private readonly logger: Logger = new Logger(RealtimeWsAuthService.name);
 
-    constructor(
-        @Inject(AUTH_SERVICE) private readonly authClient: ClientProxy,
-    ) { }
-    
+    constructor(@Inject(AUTH_SERVICE) private readonly authClient: ClientProxy) {}
+
     async authenticate(request: IWsAuthenticateRequest): Promise<{ id: number; username: string }> {
         this.logger.log('authenticate user to connect to dms');
         try {
@@ -63,5 +61,4 @@ export class RealtimeWsAuthService {
         }
         return null;
     }
-
 }

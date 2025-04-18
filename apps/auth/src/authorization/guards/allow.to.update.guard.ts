@@ -22,11 +22,11 @@ export class AllowToUpdateGuard implements CanActivate {
         const owner_id = +request.user.id,
             server = request.server;
 
-        if (!server) throw new NotFoundException('server not founded');
+        if (!server) throw new NotFoundException('servers not founded');
         if (server.owner.id !== owner_id)
-            throw new UnauthorizedException('You are not allowed to update this server');
+            throw new UnauthorizedException('You are not allowed to update this servers');
 
-        this.logger.log('server found and owner is valid');
+        this.logger.log('servers found and owner is valid');
 
         return true;
     }

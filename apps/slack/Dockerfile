@@ -13,10 +13,10 @@ RUN npm install -g pnpm
 
 RUN pnpm install
 
-COPY apps/slack.management apps/slack.management
+COPY apps/slack apps/slack
 COPY libs libs
 
-RUN pnpm run build slack.management
+RUN pnpm run build slack
 
 FROM node:18-slim as prod
 
@@ -37,4 +37,4 @@ RUN pnpm install --prod
 
 COPY --from=dev /app/dist ./dist
 
-CMD ["node", "dist/apps/slack.management/main"]
+CMD ["node", "dist/apps/slack/main"]
