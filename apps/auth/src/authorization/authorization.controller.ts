@@ -8,7 +8,7 @@ export class AuthorizationController {
     private readonly logger: Logger = new Logger(AuthorizationController.name);
 
     /**
-     * Message pattern to check if the user is allowed to update the server
+     * Message pattern to check if the user is allowed to update the servers
      * @param payload 
      * @returns payload
      */

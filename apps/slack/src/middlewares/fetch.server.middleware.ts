@@ -1,6 +1,6 @@
 import { Injectable, Logger, NestMiddleware, NotFoundException } from '@nestjs/common';
 import { RequestI } from '@app/interfaces';
-import { ServerService } from '../server/server.service';
+import { ServerService } from '../servers/server.service';
 
 @Injectable()
 export class FetchServerMiddleware implements NestMiddleware {

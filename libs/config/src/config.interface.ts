@@ -21,19 +21,7 @@ export interface dbConfig {
     synchronize: boolean;
 }
 
-export interface slackManagementConfig {
-    hostname: string;
-    httpPort: number;
-    tcpPort: number;
-}
-
-export interface socialNetworkManagementConfig {
-    hostname: string;
-    httpPort: number;
-    tcpPort: number;
-}
-
-export interface realTimeConfig {
+export interface slackConfig {
     hostname: string;
     httpPort: number;
     tcpPort: number;
@@ -43,7 +31,5 @@ export interface Config {
     authApp: authAppConfig;
     authConfig: authConfig;
     dbConfig: dbConfig;
-    slackConfig: slackManagementConfig;
-    socialNetworkConfig: socialNetworkManagementConfig;
-    realTimeConfig: realTimeConfig;
+    slackConfig: slackConfig;
 }

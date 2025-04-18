@@ -23,14 +23,4 @@ export default Joi.object({
     SLACK_HOSTNAME: Joi.string().required(),
     SLACK_HTTP_PORT: Joi.number().default(8082),
     SLACK_TCP_PORT: Joi.number().default(8083),
-
-    // social network
-    SOCIAL_NETWORK_HOSTNAME: Joi.string().required(),
-    SOCIAL_NETWORK_HTTP_PORT: Joi.number().default(8084),
-    SOCIAL_NETWORK_TCP_PORT: Joi.number().default(8085),
-
-    // real time
-    REALTIME_HOSTNAME: Joi.string().default('realtime'),
-    REALTIME_HTTP_PORT: Joi.number().default(8086),
-    REALTIME_TCP_PORT: Joi.number().default(8087),
 });
