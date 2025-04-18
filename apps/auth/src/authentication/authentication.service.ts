@@ -34,7 +34,7 @@ export class AuthenticationService {
         };
     }
 
-    // TODO: allow only this function and login to acces password and at the end remove them
+    // TODO: allow only this function and login to access password and at the end remove them
     async register(signupDto: SignupDto) {
         // hash password
         const hashedPassword = await this.bcryptProvider.hash(signupDto.password);
