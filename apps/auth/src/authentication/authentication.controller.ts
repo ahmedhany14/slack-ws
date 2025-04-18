@@ -30,15 +30,23 @@ export class AuthenticationController {
      */
     @Post('signup')
     async register(@Body() signupDto: SignupDto): Promise<{
-        user: {
-            id: number;
-            username: string;
+        response: {
+            user: {
+                id: number;
+                username: string;
+            };
+            token: string;
         };
-        token: string;
     }> {
         this.logger.log(`new sign up attempted}`);
 
-        return this.authenticationService.register(signupDto);
+        const { user, token } = await this.authenticationService.register(signupDto);
+        return {
+            response: {
+                user,
+                token,
+            },
+        };
     }
 
     /**
@@ -49,15 +57,24 @@ export class AuthenticationController {
      */
     @Post('sign-in')
     async login(@Body() loginDto: LoginDto): Promise<{
-        user: {
-            id: number;
-            username: string;
+        response: {
+            user: {
+                id: number;
+                username: string;
+            };
+            token: string;
         };
-        token: string;
     }> {
         this.logger.log(`user login attempted, email: ${loginDto.username}`);
 
-        return this.authenticationService.login(loginDto);
+        const { user, token } = await this.authenticationService.login(loginDto);
+
+        return {
+            response: {
+                user,
+                token,
+            },
+        };
     }
 
     /**
