@@ -5,9 +5,12 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigModule, ConfigService } from '@app/config';
 import { AUTH_SERVICE } from '@app/constants';
 import { DmsService } from './dms.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { DirectConversation } from '@app/database';
 
 @Module({
     imports: [
+        TypeOrmModule.forFeature([DirectConversation]),
         ClientsModule.registerAsync([
             // auth service
             {
@@ -27,4 +30,4 @@ import { DmsService } from './dms.service';
     controllers: [DmsController],
     providers: [DmsGateway, DmsService],
 })
-export class DmsModule {}
+export class DmsModule { }

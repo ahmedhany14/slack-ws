@@ -9,6 +9,7 @@ import { Namespaces } from './entities/namespaces.entity';
 import { Subscribers } from './entities/server.subscribers.entiy';
 import { FriendsInvitations } from './entities/friends.invitations.entity';
 import { DirectConversation } from '@app/database/entities/dms/direct.conversation.entity';
+import { DirectConversationMessages } from './entities/dms/direct.conversations.messges.entity';
 
 @Module({
     imports: [
@@ -35,7 +36,8 @@ import { DirectConversation } from '@app/database/entities/dms/direct.conversati
             Subscribers,
             FriendsInvitations,
             DirectConversation,
+            DirectConversationMessages
         ]),
     ],
 })
-export class DatabaseModule {}
+export class DatabaseModule { }

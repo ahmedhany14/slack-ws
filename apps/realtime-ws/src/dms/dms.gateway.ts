@@ -38,9 +38,9 @@ export class DmsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     async handleConnection(client: SocketI) {
         /*
             Here you need to implement the following functionality:
-            1) you need to check if the user is authenticated  (DONE)
+            1) you need to check if the user is authenticated (DONE)
             2) you need to send a list of the direct messages to the user (list of conversations) // the core functionality of the DMS
-            3) join the user to the room with the same name as the user id, so that the user can receive messages from other users  (DONE)
+            3) join the user to the room with the same name as the user id, so that the user can receive messages from other users (DONE)
 
             2) if the user is authenticated, you need to add the user to the list of connected users // will be implemented in the future
             3) if the user is not authenticated, you need to disconnect the user // will be implemented in the future

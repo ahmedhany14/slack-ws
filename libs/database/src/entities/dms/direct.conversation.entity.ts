@@ -30,4 +30,6 @@ export class DirectConversation extends AbstractEntity<DirectConversation> {
         onUpdate: 'CURRENT_TIMESTAMP',
     })
     updated_at: Date;
+
+    last_message: string; // the last message sent in the conversation
 }
