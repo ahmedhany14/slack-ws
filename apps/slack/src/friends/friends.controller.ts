@@ -94,10 +94,7 @@ export class FriendsController {
         @Param('receiver_id', ParseIntPipe) receiver_id: number,
     ) {
         this.logger.log(
-            `addFriend where sender_id = `,
-            sender_id,
-            ' and receiver_id = ',
-            receiver_id,
+            `add friend where sender_id =  ${sender_id}, and receiver_id = ${receiver_id}`,
         );
 
         if (sender_id === receiver_id) {
@@ -148,12 +145,8 @@ export class FriendsController {
         @Param('sender_id', ParseIntPipe) sender_id: number,
     ) {
         this.logger.log(
-            `acceptFriendRequest where sender_id = `,
-            sender_id,
-            ' and receiver_id = ',
-            receiver_id,
+            `acceptFriendRequest where sender_id = ${sender_id} and receiver_id = ${receiver_id}`,
         );
-
         await this.friendsService.findOneAndUpdate(
             {
                 sender: { id: sender_id },
@@ -184,10 +177,7 @@ export class FriendsController {
         @Param('sender_id', ParseIntPipe) sender_id: number,
     ) {
         this.logger.log(
-            `rejectFriendRequest where sender_id = `,
-            sender_id,
-            ' and receiver_id = ',
-            receiver_id,
+            `rejectFriendRequest where sender_id = ${sender_id} and receiver_id = ${receiver_id}`,
         );
 
         await this.friendsService.findOneAndUpdate(
@@ -212,12 +202,8 @@ export class FriendsController {
         @Param('receiver_id', ParseIntPipe) receiver_id: number,
     ) {
         this.logger.log(
-            `cancelFriendRequest where sender_id = `,
-            sender_id,
-            ' and receiver_id = ',
-            receiver_id,
+            `cancelFriendRequest where sender_id = ${sender_id} and receiver_id = ${receiver_id}`,
         );
-
         await this.friendsService.findOneAndDelete({
             sender: { id: sender_id },
             receiver: { id: receiver_id },
@@ -241,7 +227,8 @@ export class FriendsController {
         @ExtractUserData('id') user_id: number,
         @Param('friend_id', ParseIntPipe) friend_id: number,
     ) {
-        this.logger.log(`removeFriend where user_id = `, user_id, ' and friend_id = ', friend_id);
+        this.logger.log(`removeFriend where user_id = ${user_id} and friend_id = ${friend_id}`);
+
         await this.friendsService.findOneAndUpdate(
             {
                 sender: { id: user_id },

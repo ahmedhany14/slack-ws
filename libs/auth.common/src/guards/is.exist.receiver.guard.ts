@@ -11,39 +11,40 @@ import { catchError, map, Observable, tap } from 'rxjs';
 import { AUTH_SERVICE } from '@app/constants';
 import { ClientProxy } from '@nestjs/microservices';
 import { RequestI } from '@app/interfaces';
+import { IRequestIsExistAccount } from '@app/auth.common/interfaces/request.is.exist.account.interface';
 
 @Injectable()
 export class IsExistReceiverGuard implements CanActivate {
     private readonly logger = new Logger(IsExistReceiverGuard.name);
 
-    constructor(@Inject(AUTH_SERVICE) private readonly authClient: ClientProxy) { }
+    constructor(@Inject(AUTH_SERVICE) private readonly authClient: ClientProxy) {}
 
     canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
-        console.log('IsExistReceiverGuard');
-
         const request: RequestI = context.switchToHttp().getRequest();
 
-        const receiver_id = +request.params.receiver_id;
+        const auth_request: IRequestIsExistAccount = {
+            account_id: request.user.id,
+        };
 
-        console.log('receiver_id', receiver_id);
+        this.logger.log('IsExistReceiverGuard canActivate called', auth_request);
 
         return this.authClient
             .send('is-exist-account', {
-                id: receiver_id
+                auth_request,
             })
             .pipe(
                 tap((response) => {
-                    console.log('reciver found', response);
+                    console.log('receiver found', response);
                 }),
                 map((response) => {
                     if (response) {
                         return true;
                     } else {
-                        throw new NotFoundException('Reciver not found');
+                        throw new NotFoundException('receiver not found');
                     }
                 }),
                 catchError((error) => {
-                    throw new NotFoundException('Reciver not found');
+                    throw new NotFoundException('receiver not found');
                 }),
             );
     }
