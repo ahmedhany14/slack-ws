@@ -13,12 +13,14 @@ import { SignupDto } from './dtos/signup.dto';
 
 // guards
 import { JwtVerifyGuard } from './guards/jwt.verify.guard';
+import { IWsAuthenticateRequest } from '@app/auth.common';
+import { WsAuthenticateGuard } from './guards/ws-authenticate.guard';
 
 @Controller('authentication')
 export class AuthenticationController {
     private readonly logger: Logger = new Logger(AuthenticationController.name);
 
-    constructor(private readonly authenticationService: AuthenticationService) {}
+    constructor(private readonly authenticationService: AuthenticationService) { }
 
     @Post('signup')
     async register(@Body() signupDto: SignupDto) {
@@ -40,4 +42,12 @@ export class AuthenticationController {
         this.logger.log(`user authenticated, payload: `, payload);
         return payload.user;
     }
+
+    @UseGuards(WsAuthenticateGuard)
+    @MessagePattern('ws-authenticate')
+    async WsAuthenticate(@Payload() payload: IWsAuthenticateRequest) {
+        this.logger.log(`user authenticated, payload: `, payload.user);
+        return payload.user;
+    }
+
 }

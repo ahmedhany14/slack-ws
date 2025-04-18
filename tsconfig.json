@@ -48,6 +48,12 @@
       "@app/decorators/*": [
         "libs/decorators/src/*"
       ],
+      "@app/interceptors": [
+        "libs/interceptors/src"
+      ],
+      "@app/interceptors/*": [
+        "libs/interceptors/src/*"
+      ],
       "@app/interfaces": [
         "libs/interfaces/src"
       ],
