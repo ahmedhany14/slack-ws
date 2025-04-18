@@ -8,9 +8,10 @@ export class AuthorizationController {
     private readonly logger: Logger = new Logger(AuthorizationController.name);
 
     /**
-     * Message pattern to check if the user is allowed to update the servers
-     * @param payload 
-     * @returns payload
+     * Handles the authorization check to determine if a user is allowed to update.
+     *
+     * @param {RequestI} payload - The incoming request payload containing relevant data for the authorization check.
+     * @return {Promise<RequestI>} A promise resolving to the same request payload if the user is authorized to update.
      */
     @UseGuards(AllowToUpdateGuard)
     @MessagePattern('authorized-to-update')

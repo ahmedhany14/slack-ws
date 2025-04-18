@@ -9,9 +9,10 @@ export class AccountController {
 
     // TODO: resolve type problems, remove any in the future and create a interface
     /**
-     * Message pattern to check if the account exists
-     * @param payload
-     * @returns boolean
+     * Checks if an account exists.
+     *
+     * @param {IsExistReceiverGuard} payload - The payload containing details to check account existence.
+     * @return {Promise<boolean>} A promise that resolves to a boolean indicating if the account exists.
      */
     @UseGuards(IsExistAccountGuard)
     @MessagePattern('is-exist-account')

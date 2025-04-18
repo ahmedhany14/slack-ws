@@ -5,13 +5,12 @@ import {
     Injectable,
     Logger,
     NotFoundException,
-    UnauthorizedException,
 } from '@nestjs/common';
 import { catchError, map, Observable, tap } from 'rxjs';
 import { AUTH_SERVICE } from '@app/constants';
 import { ClientProxy } from '@nestjs/microservices';
 import { RequestI } from '@app/interfaces';
-import { IRequestIsExistAccount } from '@app/auth.common/interfaces/request.is.exist.account.interface';
+import { IRequestIsExistAccount } from '@app/auth.common';
 
 @Injectable()
 export class IsExistReceiverGuard implements CanActivate {

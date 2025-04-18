@@ -13,11 +13,12 @@ import { RequestI } from '@app/interfaces';
 
 @Injectable()
 export class AllowedServerUpdateGuard implements CanActivate {
+    private readonly logger: Logger = new Logger(AllowedServerUpdateGuard.name);
 
     constructor(@Inject(AUTH_SERVICE) private readonly authClient: ClientProxy) {}
 
     canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
-        console.log('AllowedServerUpdateGuard');
+        this.logger.log('Checking if user is allowed to update server');
 
         const request: RequestI = context.switchToHttp().getRequest();
 

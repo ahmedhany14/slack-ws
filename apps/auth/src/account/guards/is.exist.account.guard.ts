@@ -1,6 +1,6 @@
 import { CanActivate, ExecutionContext, Inject, Injectable, Logger } from '@nestjs/common';
 import { AccountService } from '../account.service';
-import { IRequestIsExistAccount } from '@app/auth.common/interfaces/request.is.exist.account.interface';
+import { IRequestIsExistAccount } from '@app/auth.common';
 
 @Injectable()
 export class IsExistAccountGuard implements CanActivate {
@@ -11,6 +11,7 @@ export class IsExistAccountGuard implements CanActivate {
         private readonly accountService: AccountService,
     ) {}
 
+    // TODO: add request interface (id, ...etc), based on the usage of this guard
     async canActivate(context: ExecutionContext): Promise<boolean> {
         this.logger.log('is exist account Guard canActivate called');
 

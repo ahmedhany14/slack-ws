@@ -10,6 +10,7 @@ import {
 
 import { JwtPayload, TokenProvider } from '../providers/token.provider';
 import { AccountService } from '../../account/account.service';
+import { JwtRequestGuardInterface } from '../interfaces/jwt.request.guard.interface';
 
 @Injectable()
 export class JwtVerifyGuard implements CanActivate {
@@ -23,7 +24,8 @@ export class JwtVerifyGuard implements CanActivate {
     async canActivate(context: ExecutionContext): Promise<boolean> {
         this.logger.log('JwtVerifyGuard canActivate called');
 
-        const request = context.switchToHttp().getRequest();
+        const request:JwtRequestGuardInterface = context.switchToHttp().getRequest();
+
         const token = request.Authentication.split(' ')[1];
         if (!token)
             throw new UnauthorizedException('You are not authorized to access this resource');
@@ -39,7 +41,10 @@ export class JwtVerifyGuard implements CanActivate {
         if (!user) throw new NotFoundException('Account not found');
 
         this.logger.log('user found in JwtVerifyGuard', user);
-        request.user = user;
+        request.user = {
+            id: user.id,
+            username: user.username,
+        };
         return true;
     }
 }

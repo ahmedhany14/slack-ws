@@ -20,6 +20,7 @@ export class Account extends AbstractEntity<Account> {
         type: 'varchar',
         length: 255,
         nullable: false,
+        select: false,
     })
     password: string;
 

@@ -15,7 +15,7 @@ export class AllowToUpdateGuard implements CanActivate {
 
     // TODO: change Interface to the correct one, based on the usage of this guard
     canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
-        this.logger.log('AllowToUpdateGuard canActivate called');
+        this.logger.log(`Checking if user is allowed to update the server`);
 
         const request: RequestI = context.switchToHttp().getRequest();
 

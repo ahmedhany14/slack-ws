@@ -17,19 +17,19 @@ export class AuthenticationService {
     ) {}
 
     async login(loginDto: LoginDto) {
-        const user = await this.accountService.findOne({ username: loginDto.username });
+        const user = await this.accountService.findWithSensitiveData(loginDto.username);
         if (!user) throw new ConflictException('username not found');
 
-        const isPasswordValid = await this.bcryptProvider.compare(
-            loginDto.password,
-            user.password,
-        );
+        const isPasswordValid = await this.bcryptProvider.compare(loginDto.password, user.password);
         if (!isPasswordValid) throw new ConflictException('password not valid');
 
         const token = await this.tokenProvider.generateToken(user);
 
         return {
-            user,
+            user: {
+                id: user.id,
+                username: user.username,
+            },
             token,
         };
     }
@@ -38,7 +38,7 @@ export class AuthenticationService {
     async register(signupDto: SignupDto) {
         // hash password
         const hashedPassword = await this.bcryptProvider.hash(signupDto.password);
-        // check if user exists
+        // check if a user exists
         if (await this.accountService.findOne({ username: signupDto.username }))
             throw new ConflictException('username used before, try another one');
 
@@ -55,7 +55,10 @@ export class AuthenticationService {
         // return user and token
 
         return {
-            user,
+            user : {
+                id: user.id,
+                username: user.username,
+            },
             token,
         };
     }
