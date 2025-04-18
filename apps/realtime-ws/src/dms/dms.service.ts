@@ -2,6 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { AbstractRepoService, DirectConversation } from '@app/database';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { SendDmMessageDto } from './dtos/send.dm.message.dto';
+import { WsException } from '@nestjs/websockets';
 
 @Injectable()
 export class DmsService extends AbstractRepoService<DirectConversation> {
@@ -60,5 +62,27 @@ export class DmsService extends AbstractRepoService<DirectConversation> {
         return combined_conversations
     }
 
+    async findOrCreateDm(
+        sendDmMessageDto: SendDmMessageDto
+    ) {
+        let directConversation: DirectConversation;
 
+        directConversation = await this.findOne({
+            conversation_initiator: { id: sendDmMessageDto.conversation_initiator },
+            conversation_recipient: { id: sendDmMessageDto.conversation_recipient }
+        }) || await this.findOne({
+            conversation_initiator: { id: sendDmMessageDto.conversation_recipient },
+            conversation_recipient: { id: sendDmMessageDto.conversation_initiator }
+        }) as DirectConversation;
+
+        if (!directConversation) {   // create 
+            directConversation = await this.create({
+                conversation_initiator: { id: sendDmMessageDto.conversation_initiator },
+                conversation_recipient: { id: sendDmMessageDto.conversation_recipient }
+            } as DirectConversation);
+        }
+
+
+        return directConversation;
+    }
 }

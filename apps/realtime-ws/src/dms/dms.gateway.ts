@@ -18,6 +18,7 @@ import { RealtimeWsAuthService } from '../realtime-ws.auth.service';
 import { WsAuthGuard } from '../guards/ws.auth.guard';
 import { SendDmMessageDto } from './dtos/send.dm.message.dto';
 import { validate } from 'class-validator';
+import { DirectConversation } from '@app/database';
 
 @UseFilters(new WsExceptionsFilter())
 @UsePipes(new ValidationPipe({
@@ -57,11 +58,11 @@ export class DmsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         /*
             Here you need to implement the following functionality:
             1) you need to check if the user is authenticated (DONE)
-            2) you need to send a list of the direct messages to the user (list of conversations) // the core functionality of the DMS
+            2) you need to send a list of the direct messages to the user (list of conversations) // the core functionality of the DMS :
             3) join the user to the room with the same name as the user id, so that the user can receive messages from other users (DONE)
 
-            2) if the user is authenticated, you need to add the user to the list of connected users // will be implemented in the future
-            3) if the user is not authenticated, you need to disconnect the user // will be implemented in the future
+            2) if the user is authenticated, you need to add the user to the list of connected users // will be implemented in the future TODO:
+            3) if the user is not authenticated, you need to disconnect the user // will be implemented in the future TODO: 
 
             */
         try {
@@ -73,7 +74,9 @@ export class DmsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
             this.logger.log('authenticate user to connect to dms', response);
             client.data.user = response;
-            client.join(`user:direct-messages:${request.user?.id}`);
+
+            this.logger.log('user:direct-messages:', `user:direct-messages:${client.data.user.id}`);
+            client.join(`user:direct-messages:${client.data.user.id}`);
         } catch (error) {
             this.logger.log('Connection error');
 
@@ -97,15 +100,33 @@ export class DmsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     @UseGuards(WsAuthGuard)
     @SubscribeMessage('send:direct-message')
-    async sendMessage(@MessageBody() body: SendDmMessageDto) {
+    async sendMessage(@MessageBody() sendDmMessageDto: SendDmMessageDto) {
 
         /*
             Here you need to implement the following functionality:
-            1) you need to check if the user is authenticated
+            1) you need to check if the user is authenticated 
             2) if the user is authenticated, you need to send the message to the recipient
-            3) if the user is not authenticated, you need to throw an exception
+            3) conversation corrner cases:
+                1) if the conversation already exists, you need to send the message to the existing conversation
+                2) if the conversation does not exist, you need to create a new conversation and send the message to the new conversation
          */
 
-        this.logger.log(`Message sent from ${body.conversation_initiator} to ${body.conversation_recipient}`);
+
+        let directConversation = await this.dmsService.findOrCreateDm(
+            sendDmMessageDto
+        )
+        // TODO: add message to messages db
+        /*
+            Will be implemented later
+        */
+        this.logger.log(`Message sent from ${sendDmMessageDto.conversation_initiator} to ${sendDmMessageDto.conversation_recipient}`);
+
+        this.server.to(`user:direct-messages:${sendDmMessageDto.conversation_recipient}`).emit('receive:direct-message', {
+            message: sendDmMessageDto.content,
+            conversation_id: directConversation?.id,
+            conversation_initiator: sendDmMessageDto.conversation_initiator,
+            conversation_recipient: sendDmMessageDto.conversation_recipient,
+        });
+
     }
 }

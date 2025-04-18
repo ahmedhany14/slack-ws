@@ -7,7 +7,6 @@ export class SendDmMessageDto {
     @MaxLength(2048)
     content: string;
 
-
     @IsPositive()
     @IsNotEmpty()
     //@IsExistUser() // TODO: add this validator 
@@ -17,10 +16,4 @@ export class SendDmMessageDto {
     @IsNotEmpty()
     //@IsExistUser() // TODO: add this validator
     conversation_recipient: number;
-
-    @IsPositive()
-    @IsNotEmpty()
-    @IsOptional()
-    //@IsExistConversation() // TODO: add this validator
-    conversation_id?: number;
 }
