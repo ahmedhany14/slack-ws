@@ -3,7 +3,6 @@ import { AbstractRepoService, DirectConversation } from '@app/database';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SendDmMessageDto } from './dtos/send.dm.message.dto';
-import { WsException } from '@nestjs/websockets';
 
 @Injectable()
 export class DmsService extends AbstractRepoService<DirectConversation> {
@@ -29,10 +28,10 @@ export class DmsService extends AbstractRepoService<DirectConversation> {
         });
 
 
-        const combined_conversations = [
+        let combined_conversations = [
             // extract recipient from the conversation started by the user
 
-            conversation_started_by_user.map((conversation) => {
+            ...conversation_started_by_user.map((conversation) => {
                 return {
                     id: conversation.id,
                     conversation_recipient: {
@@ -41,10 +40,11 @@ export class DmsService extends AbstractRepoService<DirectConversation> {
                     },
                     created_at: conversation.created_at,
                     updated_at: conversation.updated_at,
+                    last_message: conversation.last_message,
                 };
             }),
 
-            conversation_started_by_recipient.map((conversation) => {
+            ...conversation_started_by_recipient.map((conversation) => {
                 return {
                     id: conversation.id,
                     conversation_recipient: {
@@ -53,11 +53,19 @@ export class DmsService extends AbstractRepoService<DirectConversation> {
                     },
                     created_at: conversation.created_at,
                     updated_at: conversation.updated_at,
+                    last_message: conversation.last_message,
                 };
             })
             // extract initiator from the conversation started by the recipient
-
         ]
+
+        // sort the conversations by the updated_at field
+        combined_conversations.sort((a, b) => {
+            const dateA = new Date(a.updated_at);
+            const dateB = new Date(b.updated_at);
+
+            return dateB.getTime() - dateA.getTime();
+        });
 
         return combined_conversations
     }

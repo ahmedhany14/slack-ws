@@ -1,6 +1,7 @@
 import { Inject, Logger, UseFilters, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 
 import {
+    ConnectedSocket,
     MessageBody,
     OnGatewayConnection,
     OnGatewayDisconnect,
@@ -115,6 +116,14 @@ export class DmsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         let directConversation = await this.dmsService.findOrCreateDm(
             sendDmMessageDto
         )
+
+        // Update the last message in the conversation
+        await this.dmsService.findOneAndUpdate({
+            id: directConversation.id,
+        }, {
+            last_message: sendDmMessageDto.content
+        })
+
         // TODO: add message to messages db
         /*
             Will be implemented later
@@ -127,6 +136,21 @@ export class DmsGateway implements OnGatewayConnection, OnGatewayDisconnect {
             conversation_initiator: sendDmMessageDto.conversation_initiator,
             conversation_recipient: sendDmMessageDto.conversation_recipient,
         });
+    }
 
+
+    @UseGuards(WsAuthGuard)
+    @SubscribeMessage('find:my-conversations')
+    async findMyConversations(
+        @ConnectedSocket() client: SocketI,
+    ) {
+
+        const conversations = await this.dmsService.findAllMyDms(client.data.user?.id as number)
+
+        this.logger.log(`fetching conversations for user: ${client.data.user?.id}`);
+
+        this.server.to(`user:direct-messages:${client.data.user?.id}`).emit('my:direct-messages', {
+            conversations: conversations,
+        });
     }
 }

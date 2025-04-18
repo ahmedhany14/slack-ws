@@ -1,10 +1,30 @@
-import { Entity, ManyToOne, Column, JoinColumn, OneToMany } from 'typeorm';
+import { Entity, ManyToOne, Column, JoinColumn, OneToMany, UpdateDateColumn, CreateDateColumn } from 'typeorm';
 import { AbstractEntity } from '../../abstract.entity';
 import { Account } from '../account.entity';
 import { DirectConversationMessages } from './direct.conversations.messges.entity';
 
 @Entity('direct_conversations')
 export class DirectConversation extends AbstractEntity<DirectConversation> {
+
+    // TODO: add the last message sent in the conversation to appear in the list of conversations
+    @Column({
+        type: 'varchar',
+        length: 2048,
+        nullable: true
+    })
+    last_message: string;
+
+    @CreateDateColumn({
+        type: 'timestamp with time zone'
+    })
+    created_at: Date;
+
+    @UpdateDateColumn({
+        type: 'timestamp with time zone'
+    })
+    updated_at: Date;
+
+
     @ManyToOne(() => Account, {
         eager: true,
     })
@@ -19,24 +39,8 @@ export class DirectConversation extends AbstractEntity<DirectConversation> {
     })
     conversation_recipient: Account; // the user who is the recipient of the conversation
 
-    @Column({
-        type: 'timestamp with time zone',
-        default: () => 'CURRENT_TIMESTAMP',
-    })
-    created_at: Date;
-
-    @Column({
-        type: 'timestamp with time zone',
-        default: () => 'CURRENT_TIMESTAMP',
-        onUpdate: 'CURRENT_TIMESTAMP',
-    })
-    updated_at: Date;
-
     @OneToMany(() => DirectConversationMessages, (dms) => dms.conversation, {
         lazy: true
     })
     messages: Promise<DirectConversationMessages[]>
-
-    // TODO: add the last message sent in the conversation to appear in the list of conversations
-    //last_message: string; // the last message sent in the conversation
 }
