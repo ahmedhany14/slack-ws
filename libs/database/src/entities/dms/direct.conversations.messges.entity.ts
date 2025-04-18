@@ -1,12 +1,12 @@
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
-
 import { AbstractEntity } from '@app/database/abstract.entity';
 import { DirectConversation } from './direct.conversation.entity';
 import { Account } from '../account.entity';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
 
 @Entity('direct_conversation_messages')
 export class DirectConversationMessages extends AbstractEntity<DirectConversationMessages> {
+
 
     @Column({
         type: 'varchar',
@@ -27,6 +27,7 @@ export class DirectConversationMessages extends AbstractEntity<DirectConversatio
     })
     updated_at: Date;
 
+
     @ManyToOne(() => Account, (account) => account.messages, {
         eager: true,
     })
@@ -35,4 +36,13 @@ export class DirectConversationMessages extends AbstractEntity<DirectConversatio
         referencedColumnName: 'id'
     })
     creator: Account // m:1
+
+    @ManyToOne(() => DirectConversation, (dm) => dm.messages, {
+        onDelete: 'CASCADE'
+    })
+    @JoinColumn({
+        name: 'conversation_id',
+        referencedColumnName: 'id'
+    })
+    conversation: DirectConversation; // m:1
 } 

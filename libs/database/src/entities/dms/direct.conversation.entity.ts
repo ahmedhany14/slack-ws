@@ -1,6 +1,7 @@
-import { Entity, ManyToOne, Column, JoinColumn } from 'typeorm';
+import { Entity, ManyToOne, Column, JoinColumn, OneToMany } from 'typeorm';
 import { AbstractEntity } from '../../abstract.entity';
 import { Account } from '../account.entity';
+import { DirectConversationMessages } from './direct.conversations.messges.entity';
 
 @Entity('direct_conversations')
 export class DirectConversation extends AbstractEntity<DirectConversation> {
@@ -31,5 +32,10 @@ export class DirectConversation extends AbstractEntity<DirectConversation> {
     })
     updated_at: Date;
 
-    last_message: string; // the last message sent in the conversation
+    @OneToMany(() => DirectConversationMessages, (dms) => dms.conversation, {
+        lazy: true
+    })
+    messages: Promise<DirectConversationMessages[]>
+
+    //last_message: string; // the last message sent in the conversation
 }
