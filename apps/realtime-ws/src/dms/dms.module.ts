@@ -31,5 +31,6 @@ import { AUTH_SERVICE } from '@app/constants';
     ],
     controllers: [DmsController],
     providers: [DmsGateway, DmsService],
+    exports: [DmsService],
 })
 export class DmsModule { }

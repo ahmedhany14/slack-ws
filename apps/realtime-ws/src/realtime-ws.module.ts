@@ -5,6 +5,7 @@ import { RealtimeWsAuthService } from './realtime-ws.auth.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigModule, ConfigService } from '@app/config';
 import { AUTH_SERVICE } from '@app/constants';
+import { IsExistConversationValidator } from './validators/is.exist.conversation.validator';
 
 @Module({
     imports: [
@@ -27,8 +28,6 @@ import { AUTH_SERVICE } from '@app/constants';
         ]),
     ],
     providers: [RealtimeWsAuthService],
-    exports: [
-        RealtimeWsAuthService,
-    ]
+    exports: [RealtimeWsAuthService]
 })
 export class RealtimeWsModule { }

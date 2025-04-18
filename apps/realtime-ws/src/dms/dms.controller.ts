@@ -1,7 +1,14 @@
+import { Body, Controller, Delete, Get, Param, UseGuards } from '@nestjs/common';
+
+// guards
 import { AuthGuard } from '@app/auth.common';
+
+// decorators
 import { ExtractUserData } from '@app/decorators';
-import { Controller, Delete, Get, Param, UseGuards } from '@nestjs/common';
+
+// services
 import { DmsService } from './dms.service';
+import { DeleteConversationDto } from './dtos/delete.conversation.dto';
 
 @UseGuards(AuthGuard)
 @Controller('dms')
@@ -13,15 +20,17 @@ export class DmsController {
 
     @Get()
     async getMyConversations(
-        @ExtractUserData('id') id: number
+        @ExtractUserData('id') id: number,
     ) {
         return await this.dmsService.findAllMyDms(id);
     }
 
-    // TODO: Authorize that the conversation exists and the user is part of it
+    // (DONE)
+    // TODO: Authorize that the conversation exists and the user is part of it 
     @Delete(':conversation_id')
     async deleteConversation(
         @Param('conversation_id') conversation_id: number,
+        @Body() deleteConversationDto: DeleteConversationDto,
     ) {
 
         await this.dmsService.findOneAndDelete({
