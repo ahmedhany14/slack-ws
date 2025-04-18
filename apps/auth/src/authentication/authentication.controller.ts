@@ -22,6 +22,11 @@ export class AuthenticationController {
 
     constructor(private readonly authenticationService: AuthenticationService) { }
 
+    /**
+     * Endpoint to register a new user
+     * @param signupDto 
+     * @returns token and user data 
+     */
     @Post('signup')
     async register(@Body() signupDto: SignupDto) {
         this.logger.log(`new signupDto: ${signupDto}`);

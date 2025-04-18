@@ -13,4 +13,5 @@ export class AccountService extends AbstractRepoService<Account> {
         super(accountRepo);
     }
 
+    // TODO: add method to get account data with password for the authentication service
 }

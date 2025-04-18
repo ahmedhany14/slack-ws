@@ -13,6 +13,7 @@ import { RequestI } from '@app/interfaces';
 export class AllowToUpdateGuard implements CanActivate {
     private readonly logger = new Logger(AllowToUpdateGuard.name);
 
+    // TODO: change Interface to the correct one, based on the usage of this guard
     canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
         this.logger.log('AllowToUpdateGuard canActivate called');
 

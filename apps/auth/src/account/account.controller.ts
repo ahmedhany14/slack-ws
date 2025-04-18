@@ -6,6 +6,13 @@ import { IsExistAccountGuard } from './guards/is.exist.account.guard';
 export class AccountController {
     private readonly logger: Logger = new Logger(AccountController.name);
 
+
+    // TODO: resolve type problems, remove any in the future and create a interface
+    /**
+     * Message pattern to check if the account exists
+     * @param payload 
+     * @returns boolean
+     */
     @UseGuards(IsExistAccountGuard)
     @MessagePattern('is-exist-account')
     async isExistAccount(@Payload() payload: any): Promise<boolean> {

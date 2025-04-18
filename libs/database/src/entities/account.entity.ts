@@ -15,6 +15,7 @@ export class Account extends AbstractEntity<Account> {
     })
     username: string;
 
+    // TODO: Make this field non-selectable in the future
     @Column({
         type: 'varchar',
         length: 255,

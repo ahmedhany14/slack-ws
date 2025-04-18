@@ -7,6 +7,11 @@ import { AllowToUpdateGuard } from './guards/allow.to.update.guard';
 export class AuthorizationController {
     private readonly logger: Logger = new Logger(AuthorizationController.name);
 
+    /**
+     * Message pattern to check if the user is allowed to update the server
+     * @param payload 
+     * @returns payload
+     */
     @UseGuards(AllowToUpdateGuard)
     @MessagePattern('authorized-to-update')
     async allowedToUpdate(@Payload() payload: RequestI): Promise<RequestI> {
