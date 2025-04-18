@@ -17,8 +17,16 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 export class ServerController {
     private readonly logger: Logger = new Logger(ServerController.name);
 
-    constructor(@Inject() private readonly serverService: ServerService) {}
+    constructor(@Inject() private readonly serverService: ServerService) { }
 
+
+    /**
+     * Endpoint to create a new server.
+     * Any Authenticated user can create a server.
+     * @param createServerDto data to create a new server
+     * @param id owner of the server
+     * @returns the created server
+     */
     @UseGuards(AuthGuard)
     @Post()
     async create(@Body() createServerDto: CreateServerDto, @ExtractUserData('id') id: number) {
@@ -31,6 +39,15 @@ export class ServerController {
         } as Server);
     }
 
+    /**
+     * Endpoint to update a server.
+     * Only the owner of the server can update it.
+     * This endpoint is protected by authentication and authorization guards.
+     * User should be allowed to update the server only if he is the owner of the server or he is an admin on this server
+     * @param updateServerDto data to update the server
+     * @param id id of the server to update
+     * @returns the updated server
+     */
     @UseGuards(AuthGuard, AllowedServerUpdateGuard)
     @Patch(':id')
     async update(@Body() updateServerDto: UpdateServerDto, @Param('id') id: number) {
@@ -44,6 +61,29 @@ export class ServerController {
         };
     }
 
+    // TODO: create a new endpoint to send an invetation to the users to join the server
+    /**
+     * Endpoint to send an invitation to a user to join the server.
+     * This endpoint is protected by authentication and authorization guards.
+     * User should be allowed to send an invitation, based on the server role, (owner, admin only) or any user
+     * Check if user is already existing 
+     * Check if user is already a member of the server
+     * Check if user is already invited to the server
+     * @param id id of the server to send the invitation to
+     * @param user_id id of the user to send the invitation to
+     * @returns the invitation
+     */
+
+
+    /**
+     * Message pattern to get server details.
+     * This is a microservice pattern.
+     * This endpoint is protected by authentication and authorization guards.
+     * User should be member of the server to get all namespaces on this server
+     * @param id id of the server to get details
+     * @returns the server details
+     */
+    // TODO: add another auth guard to check if the user is a member of the server
     @UseGuards(AuthGuard)
     @MessagePattern('server.get.details')
     async getServerDetails(@Payload('id') id: number) {

@@ -21,8 +21,17 @@ export class NamespacesController {
     constructor(
         @Inject()
         private readonly namespacesService: NamespacesService,
-    ) {}
+    ) { }
 
+
+    /**
+     * Endpoint to create a new namespace on a server.
+     * This endpoint is protected by authentication and authorization guards.
+     * Users should be allowed to create namespaces only on servers they own, or he is an admin on this server
+     * @param server_id - The ID of the server where the namespace will be created.
+     * @param createNamespaceDto - The DTO containing the namespace data.
+     * @returns The created namespace object.
+     */
     @UseGuards(AuthGuard, AllowedServerUpdateGuard)
     @Post(':id')
     async createNamespace(
@@ -35,4 +44,14 @@ export class NamespacesController {
             server: { id: server_id },
         } as Namespaces);
     }
+
+    // TODO: add endpoint to get all namespaces on a server
+    /**
+     * Endpoint to get all namespaces on a server.
+     * This endpoint is protected by authentication and authorization guards.
+     * Server should be exist
+     * User should be member of the server to get all namespaces on this server
+     * @param server_id
+     * @returns The list of namespaces on the server.
+     */
 }
