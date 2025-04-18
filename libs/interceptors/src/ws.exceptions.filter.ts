@@ -11,7 +11,7 @@ export class WsExceptionsFilter implements WsExceptionFilter {
         const client = ctx.getClient<Socket>();
 
         // Detailed logging
-        this.logger.error('WebSocket Exception', exception);
+        this.logger.error('WebSocket Exception');
 
         // Standardize error response
         const errorResponse = {
@@ -25,7 +25,6 @@ export class WsExceptionsFilter implements WsExceptionFilter {
         // Emit error to client
         client.emit('error', errorResponse);
 
-        // Disconnect client
-        client.disconnect(true);
+        client.disconnect();
     }
 }

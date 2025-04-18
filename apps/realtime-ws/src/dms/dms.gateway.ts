@@ -1,4 +1,4 @@
-import { Inject, Logger, UseFilters } from '@nestjs/common';
+import { Inject, Logger, UseFilters, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 
 import {
     MessageBody,
@@ -14,8 +14,23 @@ import { DmsService } from './dms.service';
 import { WsExceptionsFilter } from '@app/interceptors';
 import { IWsAuthenticateRequest } from '@app/auth.common';
 import { SocketI } from '../interfaces/socket.client.interface';
+import { RealtimeWsAuthService } from '../realtime-ws.auth.service';
+import { WsAuthGuard } from '../guards/ws.auth.guard';
+import { SendDmMessageDto } from './dtos/send.dm.message.dto';
+import { validate } from 'class-validator';
 
 @UseFilters(new WsExceptionsFilter())
+@UsePipes(new ValidationPipe({
+    transform: true,
+    whitelist: true,
+    forbidNonWhitelisted: true,
+    exceptionFactory: (errors) => {
+        const messages = errors.map(error =>
+            `${error.property}: ${Object.values(error.value).join(', ')}`
+        );
+        throw new WsException(messages);
+    }
+}))
 @WebSocketGateway(3001, {
     namespace: '/dms',
     cors: {
@@ -33,7 +48,10 @@ export class DmsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     server: Server;
     private readonly logger = new Logger(DmsGateway.name);
 
-    constructor(@Inject() private readonly dmsService: DmsService) { }
+    constructor(
+        @Inject() private readonly dmsService: DmsService,
+        @Inject() private readonly realtimeWsAuthService: RealtimeWsAuthService
+    ) { }
 
     async handleConnection(client: SocketI) {
         /*
@@ -49,12 +67,12 @@ export class DmsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         try {
             // 1) you need to check if the user is authenticated
             const request: IWsAuthenticateRequest = {
-                token: this.dmsService.extractToken(client),
+                token: this.realtimeWsAuthService.extractToken(client),
             };
-            const response = await this.dmsService.authenticate(request);
+            const response = await this.realtimeWsAuthService.authenticate(request);
 
             this.logger.log('authenticate user to connect to dms', response);
-            client.data.user = response;                
+            client.data.user = response;
             client.join(`user:direct-messages:${request.user?.id}`);
         } catch (error) {
             this.logger.log('Connection error');
@@ -77,15 +95,17 @@ export class DmsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         this.logger.log(`Client disconnected: ${client.id}`);
     }
 
+    @UseGuards(WsAuthGuard)
     @SubscribeMessage('send:direct-message')
-    async sendMessage(@MessageBody() body: { sender: string; recipient: string }) {
+    async sendMessage(@MessageBody() body: SendDmMessageDto) {
+
         /*
-         Here you need to implement the following functionality:
-         1) you need to check if the user is authenticated
-         2) if the user is authenticated, you need to send the message to the recipient
-         3) if the user is not authenticated, you need to throw an exception
+            Here you need to implement the following functionality:
+            1) you need to check if the user is authenticated
+            2) if the user is authenticated, you need to send the message to the recipient
+            3) if the user is not authenticated, you need to throw an exception
          */
 
-        this.logger.log(`Message sent from ${body.sender} to ${body.recipient}`);
+        this.logger.log(`Message sent from ${body.conversation_initiator} to ${body.conversation_recipient}`);
     }
 }

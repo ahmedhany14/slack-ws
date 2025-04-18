@@ -37,5 +37,6 @@ export class DirectConversation extends AbstractEntity<DirectConversation> {
     })
     messages: Promise<DirectConversationMessages[]>
 
+    // TODO: add the last message sent in the conversation to appear in the list of conversations
     //last_message: string; // the last message sent in the conversation
 }
