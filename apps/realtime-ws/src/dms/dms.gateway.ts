@@ -99,6 +99,15 @@ export class DmsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         this.logger.log(`Client disconnected: ${client.id}`);
     }
 
+    // TODO: Authorize that recipient allows messages from the senders how are not in the friend list
+    /**
+     * ws event to send a direct message to a user
+     * Also, this event will be used to create a new conversation if the conversation does not exist
+     * Authenticated users can send messages to each other
+     * Friendship is required to send messages TODO:
+     * @param sendDmMessageDto 
+     * @emits receive:direct-message 
+     */
     @UseGuards(WsAuthGuard)
     @SubscribeMessage('send:direct-message')
     async sendMessage(@MessageBody() sendDmMessageDto: SendDmMessageDto) {
@@ -138,7 +147,13 @@ export class DmsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         });
     }
 
-
+    /**
+     * ws event to fetch all conversations for the authenticated user
+     * This event will be used to fetch all conversations for the authenticated user
+     * Authenticated users can fetch their conversations
+     * @param client 
+     * @emits my:direct-messages
+     */
     @UseGuards(WsAuthGuard)
     @SubscribeMessage('find:my-conversations')
     async findMyConversations(
@@ -153,4 +168,25 @@ export class DmsGateway implements OnGatewayConnection, OnGatewayDisconnect {
             conversations: conversations,
         });
     }
+
+    // TODO: Fetch Conversation Messages by page (pagiantion) 
+    /**
+     * ws event to fetch all messages for a conversation
+     * This event will be used to fetch all messages for a conversation
+     * Authenticated users can fetch their conversations
+     * @param client
+     * @emits conversation:messages
+     */
+
+    // TODO: Mark messages as read
+    /**
+     * ws event to mark messages as read
+     * This event will be used to mark messages as read
+     * Authenticated users can mark messages as read
+     * Authorize that user can access the conversation and mark messages as read
+     * @param client
+     * @param conversation_id
+     * @param message_id
+     * @emits mark:messages-as-read
+     */
 }
