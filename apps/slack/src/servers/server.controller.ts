@@ -61,9 +61,7 @@ export class ServerController {
         };
     }
 
-    // TODO: add is existing server decorator to check if the server exists, in body
-    // TODO: create a new endpoint to send an invitation to the users to join the servers
-
+    // DONE: add is existing server decorator to check if the server exists, in body
     /**
      * Updates server metadata based on the given ID and input data.
      *
@@ -103,6 +101,7 @@ export class ServerController {
         };
     }
 
+    // TODO: create a new endpoint to send an invitation to the users to join the servers
     /**
      * Endpoint to send an invitation to a user to join the servers.
      * This endpoint is protected by authentication and authorization guards.
