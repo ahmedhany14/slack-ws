@@ -117,7 +117,7 @@ export class DmsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         @MessageBody() sendDmMessageDto: SendDmMessageDto,
         @WsExtractUserData('id') conversation_initiator: number,
     ) {
-        let conversation = await this.dmsService.findOrCreateDm(
+        const conversation = await this.dmsService.findOrCreateDm(
             sendDmMessageDto,
             conversation_initiator
         )
@@ -129,17 +129,14 @@ export class DmsGateway implements OnGatewayConnection, OnGatewayDisconnect {
             last_message: sendDmMessageDto.content
         })
 
-        // DONE: add message to messages db
-        /*
-            Will be implemented later
-        */
-
+        // add the message to the conversation
         const message = await this.dmsMessagesService.create({
             content: sendDmMessageDto.content,
             conversation,
             creator: { id: conversation_initiator },
         } as DirectConversationMessages)
 
+        // Emit the message to the recipient
         this.server.to(`user:direct-messages:${sendDmMessageDto.conversation_recipient}`).emit('receive:direct-message', {
             conversation_id: conversation.id,
             conversation_initiator: conversation_initiator,
