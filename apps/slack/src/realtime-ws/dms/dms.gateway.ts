@@ -19,7 +19,9 @@ import { RealtimeWsAuthService } from '../realtime-ws.auth.service';
 import { WsAuthGuard } from '../guards/ws.auth.guard';
 import { SendDmMessageDto } from './dtos/send.dm.message.dto';
 import { validate } from 'class-validator';
-import { DirectConversation } from '@app/database';
+import { DirectConversation, DirectConversationMessages } from '@app/database';
+import { WsExtractUserData } from '@app/decorators';
+import { DmsMessagesService } from './services/dms.messages.service';
 
 @UseFilters(new WsExceptionsFilter())
 @UsePipes(new ValidationPipe({
@@ -52,6 +54,7 @@ export class DmsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     constructor(
         @Inject() private readonly dmsService: DmsService,
+        @Inject() private readonly dmsMessagesService: DmsMessagesService,
         @Inject() private readonly realtimeWsAuthService: RealtimeWsAuthService
     ) { }
 
@@ -110,40 +113,38 @@ export class DmsGateway implements OnGatewayConnection, OnGatewayDisconnect {
      */
     @UseGuards(WsAuthGuard)
     @SubscribeMessage('send:direct-message')
-    async sendMessage(@MessageBody() sendDmMessageDto: SendDmMessageDto) {
-
-        /*
-            Here you need to implement the following functionality:
-            1) you need to check if the user is authenticated 
-            2) if the user is authenticated, you need to send the message to the recipient
-            3) conversation corrner cases:
-                1) if the conversation already exists, you need to send the message to the existing conversation
-                2) if the conversation does not exist, you need to create a new conversation and send the message to the new conversation
-         */
-
-
-        let directConversation = await this.dmsService.findOrCreateDm(
-            sendDmMessageDto
+    async sendMessage(
+        @MessageBody() sendDmMessageDto: SendDmMessageDto,
+        @WsExtractUserData('id') conversation_initiator: number,
+    ) {
+        let conversation = await this.dmsService.findOrCreateDm(
+            sendDmMessageDto,
+            conversation_initiator
         )
 
         // Update the last message in the conversation
         await this.dmsService.findOneAndUpdate({
-            id: directConversation.id,
+            id: conversation.id,
         }, {
             last_message: sendDmMessageDto.content
         })
 
-        // TODO: add message to messages db
+        // DONE: add message to messages db
         /*
             Will be implemented later
         */
-        this.logger.log(`Message sent from ${sendDmMessageDto.conversation_initiator} to ${sendDmMessageDto.conversation_recipient}`);
+
+        const message = await this.dmsMessagesService.create({
+            content: sendDmMessageDto.content,
+            conversation,
+            creator: { id: conversation_initiator },
+        } as DirectConversationMessages)
 
         this.server.to(`user:direct-messages:${sendDmMessageDto.conversation_recipient}`).emit('receive:direct-message', {
-            message: sendDmMessageDto.content,
-            conversation_id: directConversation?.id,
-            conversation_initiator: sendDmMessageDto.conversation_initiator,
+            conversation_id: conversation.id,
+            conversation_initiator: conversation_initiator,
             conversation_recipient: sendDmMessageDto.conversation_recipient,
+            message: message,
         });
     }
 

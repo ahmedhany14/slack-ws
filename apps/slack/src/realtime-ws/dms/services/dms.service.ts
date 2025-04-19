@@ -71,23 +71,26 @@ export class DmsService extends AbstractRepoService<DirectConversation> {
         return combined_conversations;
     }
 
-    async findOrCreateDm(sendDmMessageDto: SendDmMessageDto) {
+    async findOrCreateDm(
+        sendDmMessageDto: SendDmMessageDto,
+        conversation_initiator: number,
+    ) {
         let directConversation: DirectConversation;
 
         directConversation =
             (await this.findOne({
-                conversation_initiator: { id: sendDmMessageDto.conversation_initiator },
+                conversation_initiator: { id: conversation_initiator },
                 conversation_recipient: { id: sendDmMessageDto.conversation_recipient },
             })) ||
             ((await this.findOne({
                 conversation_initiator: { id: sendDmMessageDto.conversation_recipient },
-                conversation_recipient: { id: sendDmMessageDto.conversation_initiator },
+                conversation_recipient: { id: conversation_initiator },
             })) as DirectConversation);
 
         if (!directConversation) {
             // create
             directConversation = await this.create({
-                conversation_initiator: { id: sendDmMessageDto.conversation_initiator },
+                conversation_initiator: { id: conversation_initiator },
                 conversation_recipient: { id: sendDmMessageDto.conversation_recipient },
             } as DirectConversation);
         }

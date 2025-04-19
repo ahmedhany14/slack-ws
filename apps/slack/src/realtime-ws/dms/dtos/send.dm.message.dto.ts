@@ -10,11 +10,6 @@ export class SendDmMessageDto {
 
     @IsPositive()
     @IsNotEmpty()
-    @IsExistUser() // DONE: add this validator 
-    conversation_initiator: number;
-
-    @IsPositive()
-    @IsNotEmpty()
     @IsExistUser() // DONE: add this validator
     conversation_recipient: number;
 }

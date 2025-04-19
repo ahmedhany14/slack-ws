@@ -14,6 +14,13 @@ export class DirectConversationMessages extends AbstractEntity<DirectConversatio
     })
     content: string;
 
+
+    @Column({
+        type: 'boolean',
+        default: false,
+    })
+    marked: boolean;
+
     @Column({
         type: 'timestamp with time zone',
         default: () => 'CURRENT_TIMESTAMP',

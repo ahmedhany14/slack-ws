@@ -35,7 +35,7 @@ export class DmsController {
         private readonly dmsService: DmsService,
         @Inject()
         private readonly dmsMessagesService: DmsMessagesService,
-    ) {}
+    ) { }
 
     /**
      * Retrieves all conversations associated with the given user ID.
@@ -46,19 +46,19 @@ export class DmsController {
     @Get()
     async getMyConversations(@ExtractUserData('id') id: number): Promise<
         | {
-              response: {
-                  conversations: {
-                      id: number;
-                      conversation_recipient: {
-                          id: number;
-                          username: string;
-                      };
-                      created_at: Date;
-                      updated_at: Date;
-                      last_message: string;
-                  };
-              }[];
-          }
+            response: {
+                conversations: {
+                    id: number;
+                    conversation_recipient: {
+                        id: number;
+                        username: string;
+                    };
+                    created_at: Date;
+                    updated_at: Date;
+                    last_message: string;
+                };
+            }[];
+        }
         | {}
     > {
         this.logger.log(`User ${id} is requesting all his conversations`);
@@ -150,7 +150,7 @@ export class DmsController {
     }
 
     // DONE: implement endpoint to retrieve conversation messages by page
-    // TODO: test endpoint after implementing ws storing messages
+    // DONE: test endpoint after implementing ws storing messages
     /**
      * Retrieves messages for a specified conversation based on the provided conversation data and pagination details.
      *
@@ -174,21 +174,12 @@ export class DmsController {
         };
     }> {
         this.logger.log(`User is requesting messages for conversation ${conversation.id}`);
-        const messages = await this.dmsMessagesService.paginate(
-            {
-                id: conversation.id,
-            },
-            `http://localhost:3000/dms/messages/${conversation.id}`,
-            page ?? 1,
-            100,
+
+
+        return this.dmsMessagesService.findConversationMessages(
+            conversation,
+            page,
         );
-
-        // sort messages by created_at, newest first
-        messages.response.sort((a, b) => {
-            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-        });
-
-        return messages;
     }
 
     // TODO: implement endpoint to delete message
