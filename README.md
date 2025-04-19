@@ -38,8 +38,6 @@
 - [Entity Relationship Diagram (ERD)](#entity-relationship-diagram-erd)
 - [System Design](#system-design)
 - [Project setup](#project-setup)
-- [Compile and run the project](#compile-and-run-the-project)
-- [Run tests](#run-tests)
 - [Usage](#usage)
 - [License](#license)
 
@@ -85,45 +83,25 @@ admins.
 
 ## Project setup
 
-1. Clone the repository:
+#### Make sure you have docker and docker-compose installed on your machine.
+
+2. Clone the repository:
 
 ```bash
 $ git https://github.com/ahmedhany14/slack-ws.git
 $ cd slack-ws
 ```
-
-2. Install dependencies:
-
-```bash
-$ pnpm install
-```
-
-## Compile and run the project
+2. Create a `dev.env` file in the root directory and add the following environment variables (see example.env file):
 
 ```bash
-# development
-$ pnpm run start
-
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
+$ touch dev.env
 ```
 
-## Run tests
+3. docker command to build the project:
 
 ```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
+$ docker-compose up --build
 ```
-
 ## Usage
 
 * **WebSocket Server**: The backend will expose WebSocket connections for users and admins to join different chat rooms.
