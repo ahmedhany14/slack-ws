@@ -1,3 +1,4 @@
+import { DirectConversation, Server } from '@app/database';
 import { Request } from 'express';
 
 export interface RequestI extends Request {
@@ -5,5 +6,6 @@ export interface RequestI extends Request {
         id: number;
         username: string;
     };
-
+    conversation?: DirectConversation;
+    server?: Server
 }

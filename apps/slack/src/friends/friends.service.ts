@@ -1,6 +1,5 @@
-import { AbstractRepoService, RequestStatus } from '@app/database';
-import { FriendsInvitations } from '@app/database';
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { AbstractRepoService, FriendsInvitations, RequestStatus } from '@app/database';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -35,5 +34,14 @@ export class FriendsService extends AbstractRepoService<FriendsInvitations> {
                 name: friend.sender.username,
             })),
         ];
+    }
+
+    async findMutualFriends(conversation_initiator: number, conversation_recipient: number) {
+        const initiatorFriends = await this.getMyFriends(conversation_initiator);
+        const recipientFriends = await this.getMyFriends(conversation_recipient);
+
+        return initiatorFriends.filter((friend) =>
+            recipientFriends.some((f) => f.id === friend.id),
+        );
     }
 }

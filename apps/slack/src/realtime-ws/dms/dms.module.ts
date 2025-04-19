@@ -8,11 +8,13 @@ import { RealtimeWsModule } from '../realtime-ws.module';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigModule, ConfigService } from '@app/config';
 import { AUTH_SERVICE } from '@app/constants';
+import { FriendsModule } from '../../friends/friends.module';
 
 @Module({
     imports: [
         TypeOrmModule.forFeature([DirectConversation]),
         forwardRef(() => RealtimeWsModule), // to avoid circular dependency
+        FriendsModule,
         ClientsModule.registerAsync([
             // auth service
             {
