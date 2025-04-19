@@ -22,6 +22,10 @@ import { validate } from 'class-validator';
 import { DirectConversation, DirectConversationMessages } from '@app/database';
 import { WsExtractUserData } from '@app/decorators';
 import { DmsMessagesService } from './services/dms.messages.service';
+import { console } from 'inspector';
+import { MarkMessageAsReadDto } from './dtos/mark.message.as-read.dto';
+import { WsIsYourConversationGuard } from './guards/ws.is.your.conversation.guard';
+import { WsIsMeassageBelongToConversationGuard } from './guards/ws.is.message.belong.to.conversation.guard';
 
 @UseFilters(new WsExceptionsFilter())
 @UsePipes(new ValidationPipe({
@@ -167,6 +171,45 @@ export class DmsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         });
     }
 
+    // DONE: Mark messages as read
+    /**
+     * ws event to mark messages as read
+     * 
+     * This event will be used to mark messages as read
+     * 
+     * @param() client: SocketI 
+     * @emits mark:messages-as-read to the recipient
+     */
+    @UseGuards(WsAuthGuard, WsIsYourConversationGuard, WsIsMeassageBelongToConversationGuard)
+    @SubscribeMessage('mark:messages-as-read')
+    async markMessagesAsRead(
+        @ConnectedSocket() client: SocketI,
+    ) {
+        const {
+            user,
+            conversation,
+            message
+        } = client.data
+
+        const readed_message = await this.dmsMessagesService.findOneAndUpdate({
+            id: message?.id
+        }, {
+            marked: true
+        })
+
+        const to = user?.id === conversation?.conversation_initiator.id ?
+            conversation?.conversation_recipient.id :
+            conversation?.conversation_initiator.id
+
+        this.server.to(`user:direct-messages:${to}`).emit('mark:messages-as-read', {
+            conversation_id: conversation?.id,
+            message_id: message?.id,
+            reader_id: user?.id,
+            message: readed_message,
+        });
+
+    }
+
     // TODO: Fetch Conversation Messages by page (pagiantion) 
     /**
      * ws event to fetch all messages for a conversation
@@ -174,17 +217,5 @@ export class DmsGateway implements OnGatewayConnection, OnGatewayDisconnect {
      * Authenticated users can fetch their conversations
      * @param client
      * @emits conversation:messages
-     */
-
-    // TODO: Mark messages as read
-    /**
-     * ws event to mark messages as read
-     * This event will be used to mark messages as read
-     * Authenticated users can mark messages as read
-     * Authorize that user can access the conversation and mark messages as read
-     * @param client
-     * @param conversation_id
-     * @param message_id
-     * @emits mark:messages-as-read
      */
 }

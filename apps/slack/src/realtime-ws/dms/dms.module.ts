@@ -18,6 +18,7 @@ import { DmsService } from './services/dms.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigModule, ConfigService } from '@app/config';
 import { AUTH_SERVICE } from '@app/constants';
+import { IsExistConversationValidator, IsExistMessageValidator } from '@app/validators';
 
 
 @Module({
@@ -42,7 +43,7 @@ import { AUTH_SERVICE } from '@app/constants';
         ]),
     ],
     controllers: [DmsController],
-    providers: [DmsGateway, DmsService, DmsMessagesService],
+    providers: [DmsGateway, DmsService, DmsMessagesService, IsExistMessageValidator, IsExistConversationValidator],
     exports: [DmsService],
 })
 export class DmsModule { }

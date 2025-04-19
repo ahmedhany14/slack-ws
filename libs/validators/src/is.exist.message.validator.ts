@@ -1,46 +1,45 @@
-// src/validators/is-exist-conversation.validator.ts
 
 import { Injectable, Logger } from '@nestjs/common';
 import { ValidatorConstraint, ValidatorConstraintInterface, ValidationArguments } from 'class-validator';
 import { registerDecorator, ValidationOptions } from 'class-validator';
 import { DataSource } from 'typeorm';
-import { DirectConversation } from '@app/database';
+import { DirectConversationMessages } from '@app/database';
 
-@ValidatorConstraint({ name: 'isExistConversation', async: true })
+@ValidatorConstraint({ name: 'IsExistUser', async: true })
 @Injectable()
-export class IsExistConversationValidator implements ValidatorConstraintInterface {
-    private readonly logger: Logger = new Logger(IsExistConversationValidator.name);
-
+export class IsExistMessageValidator implements ValidatorConstraintInterface {
+    private readonly logger = new Logger(IsExistMessageValidator.name);
     constructor(private readonly dataSource: DataSource) { }
 
     async validate(id: number, args: ValidationArguments) {
         try {
-            const conversationRepository = this.dataSource.getRepository(DirectConversation);
-            const conversation = await conversationRepository.findOne({
+
+            const dmsMessagesRepository = this.dataSource.getRepository(DirectConversationMessages);
+            const message = await dmsMessagesRepository.findOne({
                 where: { id },
                 select: ['id'],
             });
 
-            return conversation !== null && conversation !== undefined;
+            return message !== null && message !== undefined;
         } catch (error) {
             return false;
         }
     }
 
     defaultMessage(args: ValidationArguments) {
-        return `Conversation with id ${args.value} does not exist`;
+        return `message with id ${args.value} does not exist`;
     }
 }
 
 
-export function IsExistConversation(validationOptions?: ValidationOptions) {
+export function IsExistMessage(validationOptions?: ValidationOptions) {
     return function (object: Object, propertyName: string) {
         registerDecorator({
-            name: 'isExistConversation',
+            name: 'IsExistMessage',
             target: object.constructor,
             propertyName: propertyName,
             options: validationOptions,
-            validator: IsExistConversationValidator,
+            validator: IsExistMessageValidator,
         });
     };
 }
