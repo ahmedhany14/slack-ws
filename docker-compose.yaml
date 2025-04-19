@@ -25,6 +25,7 @@ services:
     command: pnpm run start:dev slack
     ports:
       - '8082:8082'
+      - '3001:3001'
     volumes:
       - .:/app
     env_file:

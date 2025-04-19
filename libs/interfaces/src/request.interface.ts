@@ -1,5 +1,4 @@
 import { Request } from 'express';
-import { Server } from '@app/database';
 
 export interface RequestI extends Request {
     user: {
@@ -7,5 +6,4 @@ export interface RequestI extends Request {
         username: string;
     };
 
-    server: Server;
 }

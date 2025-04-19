@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { SlackModule } from './slack.module';
 import { Transport } from '@nestjs/microservices';
 import { ValidationPipe } from '@nestjs/common';
-import * as cookieParser from 'cookie-parser';
+import { useContainer } from 'class-validator';
 
 async function bootstrap() {
     const app = await NestFactory.create(SlackModule);
@@ -29,6 +29,7 @@ async function bootstrap() {
     await app.startAllMicroservices().then(() => {
         console.log('Slack microservice is running');
     });
+    useContainer(app.select(SlackModule), { fallbackOnErrors: true });
 
     await app.listen(process.env.SLACK_HTTP_PORT ?? 3000);
 }

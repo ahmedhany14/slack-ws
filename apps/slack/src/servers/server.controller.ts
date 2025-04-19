@@ -1,7 +1,17 @@
-import { Body, Controller, Inject, Logger, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import {
+    Body,
+    ConflictException,
+    Controller,
+    Inject,
+    Logger,
+    Param,
+    Patch,
+    Post,
+    UseGuards,
+} from '@nestjs/common';
 
 // libraries
-import { AllowedServerUpdateGuard, AuthGuard } from '@app/auth.common';
+import { AuthGuard } from '@app/auth.common';
 import { ExtractUserData } from '@app/decorators';
 import { Server } from '@app/database';
 
@@ -11,21 +21,13 @@ import { ServerService } from './server.service';
 // dto
 import { CreateServerDto } from './dtos/create.server.dto';
 import { UpdateServerDto } from './dtos/update.server.dto';
-import { MessagePattern, Payload } from '@nestjs/microservices';
+import { IsServerOwner } from './guards/is.server.owner';
 
 @Controller('server')
 export class ServerController {
     private readonly logger: Logger = new Logger(ServerController.name);
 
     constructor(@Inject() private readonly serverService: ServerService) {}
-
-    /**
-     * Endpoint to create a new servers.
-     * Any Authenticated user can create a servers.
-     * @param createServerDto data to create a new servers
-     * @param id owner of the servers
-     * @returns the created servers
-     */
 
     /**
      * Creates a new server using the provided data and user id.
@@ -60,31 +62,39 @@ export class ServerController {
     }
 
     // TODO: add is existing server decorator to check if the server exists, in body
+    // TODO: create a new endpoint to send an invitation to the users to join the servers
+
     /**
      * Updates server metadata based on the given ID and input data.
      *
      * @param {UpdateServerDto} updateServerDto - The data transfer object containing the updated server information.
-     * @param {number} server_id - The unique identifier of the server to be updated.
+     * @param {number} serverId - The unique identifier of the server to be updated.
      * @returns {Promise<{ response: { server: Server } }>} - A promise that resolves to an object containing the updated server.
      */
-    @UseGuards(AuthGuard, AllowedServerUpdateGuard)
+    @UseGuards(AuthGuard, IsServerOwner)
     @Patch(':server_id')
     async update(
+        @Param('server_id') serverId: number,
         @Body() updateServerDto: UpdateServerDto,
-        @Param('server_id') server_id: number,
     ): Promise<{
         response: {
             server: Server;
         };
     }> {
-        this.logger.log(`updating server, id: ${server_id}`);
+        this.logger.log(`updating server, id: ${serverId}`);
+        if (serverId !== updateServerDto.server_id) {
+            throw new ConflictException({
+                message: 'server_id in body and url should be same',
+            });
+        }
 
-        const server = await this.serverService.findOneAndUpdate(
+        const { server_id, ...updateData } = updateServerDto;
+        const server = (await this.serverService.findOneAndUpdate(
             {
                 id: server_id,
             },
-            { ...updateServerDto },
-        ) as Server;
+            updateData,
+        )) as Server;
 
         return {
             response: {
@@ -93,7 +103,6 @@ export class ServerController {
         };
     }
 
-    // TODO: create a new endpoint to send an invitation to the users to join the servers
     /**
      * Endpoint to send an invitation to a user to join the servers.
      * This endpoint is protected by authentication and authorization guards.

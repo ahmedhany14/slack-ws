@@ -1,4 +1,4 @@
-import { AllowedServerUpdateGuard, AuthGuard } from '@app/auth.common';
+import { AuthGuard } from '@app/auth.common';
 import {
     Body,
     Controller,
@@ -25,13 +25,13 @@ export class NamespacesController {
 
     /**
      * Creates a namespace associated with a specific server.
-     * Logs the operation and delegates to the namespace service to perform the creation.
+     * Logs the operation and delegate to the namespace service to perform the creation.
      *
      * @param {number} server_id - The ID of the server on which the namespace will be created.
      * @param {CreateNamespaceDto} createNamespaceDto - The data transfer object that contains the details of the namespace to be created.
      * @returns {Promise<{ response: { namespace: Namespaces } }>} - A promise that resolves to an object containing the created namespace.
      */
-    @UseGuards(AuthGuard, AllowedServerUpdateGuard)
+    @UseGuards(AuthGuard)
     @Post(':id')
     async createNamespace(
         @Param('id', ParseIntPipe) server_id: number,
