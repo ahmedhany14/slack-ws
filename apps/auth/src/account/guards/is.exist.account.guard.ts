@@ -11,7 +11,7 @@ export class IsExistAccountGuard implements CanActivate {
         private readonly accountService: AccountService,
     ) {}
 
-    // TODO: add request interface (id, ...etc), based on the usage of this guard
+    // DONE: add request interface (id, ...etc), based on the usage of this guard
     async canActivate(context: ExecutionContext): Promise<boolean> {
         this.logger.log('is exist account Guard canActivate called');
 

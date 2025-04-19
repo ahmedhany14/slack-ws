@@ -14,12 +14,6 @@ async function bootstrap() {
         },
     });
 
-    app.use(
-        cookieParser({
-            maxAge: 60 * 60 * 24 * 7, // 1 week
-            httpOnly: true,
-        }),
-    );
 
     app.useGlobalPipes(
         new ValidationPipe({

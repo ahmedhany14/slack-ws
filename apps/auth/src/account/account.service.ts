@@ -14,7 +14,7 @@ export class AccountService extends AbstractRepoService<Account> {
         super(accountRepo);
     }
 
-    // TODO: add method to get account data with password for the authentication service
+    // DONE: add method to get account data with password for the authentication service
     async findWithSensitiveData(username: string): Promise<Account | null> {
         try {
             return this.accountRepo.findOne({

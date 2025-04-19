@@ -1,71 +1,45 @@
 {
-  "compilerOptions": {
-    "module": "commonjs",
-    "declaration": true,
-    "removeComments": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true,
-    "target": "ES2023",
-    "sourceMap": true,
-    "outDir": "./dist",
-    "baseUrl": "./",
-    "incremental": true,
-    "skipLibCheck": true,
-    "strictNullChecks": true,
-    "forceConsistentCasingInFileNames": true,
-    "noImplicitAny": false,
-    "strictBindCallApply": false,
-    "noFallthroughCasesInSwitch": false,
-    "paths": {
-      "@app/auth.common": [
-        "libs/auth.common/src"
-      ],
-      "@app/auth.common/*": [
-        "libs/auth.common/src/*"
-      ],
-      "@app/config": [
-        "libs/config/src"
-      ],
-      "@app/config/*": [
-        "libs/config/src/*"
-      ],
-      "@app/constants": [
-        "libs/constants/src"
-      ],
-      "@app/constants/*": [
-        "libs/constants/src/*"
-      ],
-      "@app/database": [
-        "libs/database/src"
-      ],
-      "@app/database/*": [
-        "libs/database/src/*"
-      ],
-      "@app/decorators": [
-        "libs/decorators/src"
-      ],
-      "@app/decorators/*": [
-        "libs/decorators/src/*"
-      ],
-      "@app/interceptors": [
-        "libs/interceptors/src"
-      ],
-      "@app/interceptors/*": [
-        "libs/interceptors/src/*"
-      ],
-      "@app/interfaces": [
-        "libs/interfaces/src"
-      ],
-      "@app/interfaces/*": [
-        "libs/interfaces/src/*"
-      ],
-      "@app/logger": [
-        "libs/logger/src"
-      ],
-      "@app/logger/*": [
-        "libs/logger/src/*"
-      ]
+    "compilerOptions": {
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "esModuleInterop": true,
+        "resolveJsonModule": true,
+        "typeRoots": ["node_modules/@types"],
+        "declaration": true,
+        "removeComments": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "allowSyntheticDefaultImports": true,
+        "target": "ES2023",
+        "sourceMap": true,
+        "outDir": "./dist",
+        "baseUrl": "./",
+        "incremental": true,
+        "skipLibCheck": true,
+        "strictNullChecks": true,
+        "forceConsistentCasingInFileNames": true,
+        "noImplicitAny": false,
+        "strictBindCallApply": false,
+        "noFallthroughCasesInSwitch": false,
+        "paths": {
+            "@app/auth.common": ["libs/auth.common/src"],
+            "@app/auth.common/*": ["libs/auth.common/src/*"],
+            "@app/config": ["libs/config/src"],
+            "@app/config/*": ["libs/config/src/*"],
+            "@app/constants": ["libs/constants/src"],
+            "@app/constants/*": ["libs/constants/src/*"],
+            "@app/database": ["libs/database/src"],
+            "@app/database/*": ["libs/database/src/*"],
+            "@app/decorators": ["libs/decorators/src"],
+            "@app/decorators/*": ["libs/decorators/src/*"],
+            "@app/interceptors": ["libs/interceptors/src"],
+            "@app/interceptors/*": ["libs/interceptors/src/*"],
+            "@app/interfaces": ["libs/interfaces/src"],
+            "@app/interfaces/*": ["libs/interfaces/src/*"],
+            "@app/logger": ["libs/logger/src"],
+            "@app/logger/*": ["libs/logger/src/*"],
+            "@app/validators": ["libs/validators/src"],
+            "@app/validators/*": ["libs/validators/src/*"]
+        }
     }
-  }
 }

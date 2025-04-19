@@ -3,17 +3,20 @@
 import { Injectable } from '@nestjs/common';
 import { ValidatorConstraint, ValidatorConstraintInterface, ValidationArguments } from 'class-validator';
 import { registerDecorator, ValidationOptions } from 'class-validator';
-import { DmsService } from '../dms/dms.service';
+import { DataSource } from 'typeorm';
+import { DirectConversation } from '@app/database';
 
 @ValidatorConstraint({ name: 'isExistConversation', async: true })
 @Injectable()
 export class IsExistConversationValidator implements ValidatorConstraintInterface {
-    constructor(private readonly dmsService: DmsService) { }
+    constructor(private readonly dataSource: DataSource) { }
 
     async validate(id: number, args: ValidationArguments) {
         try {
-            const conversation = await this.dmsService.findOne({
-                id
+            const conversationRepository = this.dataSource.getRepository(DirectConversation);
+            const conversation = await conversationRepository.findOne({
+                where: { id },
+                select: ['id'],
             });
             return conversation !== null && conversation !== undefined;
         } catch (error) {

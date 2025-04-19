@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, UseGuards } from '@nestjs/common';
+import { Body, ConflictException, Controller, Delete, Get, Param, UseGuards } from '@nestjs/common';
 
 // guards
 import { AuthGuard } from '@app/auth.common';
@@ -32,6 +32,12 @@ export class DmsController {
         @Param('conversation_id') conversation_id: number,
         @Body() deleteConversationDto: DeleteConversationDto,
     ) {
+        if (deleteConversationDto.conversation_id !== conversation_id) {
+            throw new ConflictException({
+                message: 'Conversation id in the body does not match the conversation id in the url'
+            });
+        }
+
 
         await this.dmsService.findOneAndDelete({
             id: conversation_id
