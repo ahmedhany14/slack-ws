@@ -25,8 +25,7 @@ export class DmsController {
         return await this.dmsService.findAllMyDms(id);
     }
 
-    // (DONE)
-    // TODO: Authorize that the conversation exists and the user is part of it 
+    // DONE: Authorize that the conversation exists and the user is part of it 
     @Delete(':conversation_id')
     async deleteConversation(
         @Param('conversation_id') conversation_id: number,

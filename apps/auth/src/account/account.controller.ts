@@ -7,7 +7,7 @@ import { IsExistReceiverGuard } from '@app/auth.common/guards/is.exist.receiver.
 export class AccountController {
     private readonly logger: Logger = new Logger(AccountController.name);
 
-    // TODO: resolve type problems, remove any in the future and create a interface
+    // DONE: resolve type problems, remove any in the future and create a interface
     /**
      * Checks if an account exists.
      *
