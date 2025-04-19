@@ -2,8 +2,8 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { AbstractRepoService, DirectConversation } from '@app/database';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { SendDmMessageDto } from './dtos/send.dm.message.dto';
-import { FriendsService } from '../../friends/friends.service';
+import { SendDmMessageDto } from '../dtos/send.dm.message.dto';
+import { FriendsService } from '../../../friends/friends.service';
 
 @Injectable()
 export class DmsService extends AbstractRepoService<DirectConversation> {

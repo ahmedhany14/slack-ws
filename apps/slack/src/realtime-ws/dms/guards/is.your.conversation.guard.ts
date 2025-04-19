@@ -1,9 +1,9 @@
 import { CanActivate, ExecutionContext, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { DmsService } from '../dms.service';
+import { DmsService } from '../services/dms.service';
 import { RequestI } from '@app/interfaces';
 
 @Injectable()
-export class IsYourConversactionGuard implements CanActivate {
+export class IsYourConversationGuard implements CanActivate {
 
     constructor(
         @Inject() private readonly dmsService: DmsService

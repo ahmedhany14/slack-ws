@@ -7,6 +7,8 @@ import {
     Param,
     UseGuards,
     Logger,
+    Inject,
+    Query,
 } from '@nestjs/common';
 
 // guards
@@ -16,17 +18,24 @@ import { AuthGuard } from '@app/auth.common';
 import { ExtractUserData, ExtractConversationData } from '@app/decorators';
 
 // services
-import { DmsService } from './dms.service';
+import { DmsService } from './services/dms.service';
 import { DeleteConversationDto } from './dtos/delete.conversation.dto';
-import { DirectConversation } from '@app/database';
-import { IsYourConversactionGuard } from './guards/is.your.conversaction.guard';
+import { DirectConversation, DirectConversationMessages } from '@app/database';
+import { IsYourConversationGuard } from './guards/is.your.conversation.guard';
+import { PaginationDto } from '@app/validators';
+import { DmsMessagesService } from './services/dms.messages.service';
 
 @UseGuards(AuthGuard)
 @Controller('dms')
 export class DmsController {
     private readonly logger: Logger = new Logger(DmsController.name);
 
-    constructor(private readonly dmsService: DmsService) {}
+    constructor(
+        @Inject()
+        private readonly dmsService: DmsService,
+        @Inject()
+        private readonly dmsMessagesService: DmsMessagesService,
+    ) {}
 
     /**
      * Retrieves all conversations associated with the given user ID.
@@ -72,7 +81,7 @@ export class DmsController {
      * @return {Promise<{response: {message: string}}>} A promise resolving to an object with a response containing a success message.
      * @throws {ConflictException} If the conversation ID in the request body does not match the conversation ID in the URL.
      */
-    @UseGuards(IsYourConversactionGuard)
+    @UseGuards(IsYourConversationGuard)
     @Delete(':conversation_id')
     async deleteConversation(
         @Param('conversation_id') conversation_id: number,
@@ -82,6 +91,8 @@ export class DmsController {
             message: string;
         };
     }> {
+        this.logger.log(`User is requesting to delete conversation ${conversation_id}`);
+
         if (deleteConversationDto.conversation_id !== conversation_id) {
             throw new ConflictException({
                 message:
@@ -108,7 +119,7 @@ export class DmsController {
      * @return {Promise<{response: {conversation_id: number, mutual_friends: {id: number, name: string}[]}}>}
      *         A promise resolving an object containing the conversation ID and a list of mutual friends.
      */
-    @UseGuards(IsYourConversactionGuard)
+    @UseGuards(IsYourConversationGuard)
     @Get('metadata/:conversation_id')
     async getConversationMetadata(
         @ExtractConversationData() conversation: DirectConversation,
@@ -138,23 +149,47 @@ export class DmsController {
         };
     }
 
-    // TODO: implement endpoint to retrieve conversation messages
+    // DONE: implement endpoint to retrieve conversation messages by page
+    // TODO: test endpoint after implementing ws storing messages
     /**
-     * Endpoint to retrieve conversation messages
-     * Authorize that the conversation exists and the user is part of it
-     * @param conversation_id
-     * @return conversation messages
+     * Retrieves messages for a specified conversation based on the provided conversation data and pagination details.
+     *
+     * @param {DirectConversation} conversation - The conversation data extracted from the request, which includes details about the specific conversation.
+     * @param {number} page - The page number for pagination, indicating which set of messages to retrieve.
+     * @return {Promise<{response: DirectConversationMessages[], meta: {total: number, page: number, limit: number, totalPages: number, hasMore: boolean}}>}
      */
+    @UseGuards(IsYourConversationGuard)
+    @Get('messages/:conversation_id')
+    async getConversationMessages(
+        @ExtractConversationData() conversation: DirectConversation,
+        @Query('page') page: number,
+    ): Promise<{
+        response: DirectConversationMessages[];
+        meta: {
+            total: number;
+            page: number;
+            limit: number;
+            totalPages: number;
+            hasMore: boolean;
+        };
+    }> {
+        this.logger.log(`User is requesting messages for conversation ${conversation.id}`);
+        const messages = await this.dmsMessagesService.paginate(
+            {
+                id: conversation.id,
+            },
+            `http://localhost:3000/dms/messages/${conversation.id}`,
+            page ?? 1,
+            100,
+        );
 
-    // TODO: implement endpoint to retrieve conversation messages by page
-    /**
-     * Endpoint to retrieve conversation messages by page (pagination)
-     * Authorize that the conversation exists and the user is part of it
-     * @param conversation_id
-     * @param page
-     * @param limit
-     * @return conversation messages
-     */
+        // sort messages by created_at, newest first
+        messages.response.sort((a, b) => {
+            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        });
+
+        return messages;
+    }
 
     // TODO: implement endpoint to delete message
     /**

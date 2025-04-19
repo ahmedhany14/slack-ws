@@ -11,7 +11,7 @@ import {
     WsException,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { DmsService } from './dms.service';
+import { DmsService } from './services/dms.service';
 import { WsExceptionsFilter } from '@app/interceptors';
 import { IWsAuthenticateRequest } from '@app/auth.common';
 import { SocketI } from '../interfaces/socket.client.interface';
