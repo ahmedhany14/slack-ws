@@ -11,7 +11,7 @@ import { SubscribersModule } from './subscribers/subscribers.module';
 import { DatabaseModule } from '@app/database';
 import { FriendsModule } from './friends/friends.module';
 import { RealtimeWsModule } from './realtime-ws/realtime-ws.module';
-import { IsExistConversationValidator, IsExistServerValidator } from '@app/validators';
+import { IsExistConversationValidator, IsExistServerValidator, IsExistUserValidator } from '@app/validators';
 
 @Module({
     imports: [
@@ -23,6 +23,6 @@ import { IsExistConversationValidator, IsExistServerValidator } from '@app/valid
         DatabaseModule
     ],
     controllers: [SlackController],
-    providers: [SlackService, IsExistConversationValidator, IsExistServerValidator],
+    providers: [SlackService, IsExistConversationValidator, IsExistServerValidator, IsExistUserValidator],
 })
 export class SlackModule {}

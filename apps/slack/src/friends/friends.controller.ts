@@ -14,8 +14,9 @@ import {
 import { FriendsService } from './friends.service';
 import { AuthGuard } from '@app/auth.common';
 import { ExtractUserData } from '@app/decorators';
-import { IsExistReceiverGuard } from '@app/auth.common/guards/is.exist.receiver.guard';
 import { FriendsInvitations, RequestStatus } from '@app/database';
+import { Body } from '@nestjs/common';
+import { AcceptFriendRequestDto, CancelFriendRequestDto, RejectFriendRequestDto, RemoveFriendDto, SendFriendRequestDto } from './dtos/friend.reques.id.validators.dto';
 
 @UseGuards(AuthGuard)
 @Controller('friends')
@@ -25,7 +26,7 @@ export class FriendsController {
     constructor(
         @Inject()
         private readonly friendsService: FriendsService,
-    ) {}
+    ) { }
 
     /**
      * Retrieves all friends for the specified user.
@@ -129,17 +130,18 @@ export class FriendsController {
      *
      * @param {number} sender_id - The ID of the user sending the friend request.
      * @param {number} receiver_id - The ID of the user receiving the friend request.
+     * @param {SendFriendRequestDto} sendFriendRequesDto - The DTO containing the details of the friend request.
      * @return {Promise<FriendsInvitations>} A promise that resolves with the new friend request invitation object if successful.
      * @throws {ConflictException} If the sender attempts to send a request to themselves.
      * @throws {ConflictException} If the sender and receiver are already friends.
      * @throws {ConflictException} If the friend request has already been sent by the sender.
      * @throws {ConflictException} If there is already a pending friend request from the receiver to the sender.
      */
-    @UseGuards(IsExistReceiverGuard)
     @Post('send-friend-request/:receiver_id')
     async addFriend(
         @ExtractUserData('id') sender_id: number,
         @Param('receiver_id', ParseIntPipe) receiver_id: number,
+        @Body() sendFriendRequesDto: SendFriendRequestDto,
     ): Promise<{
         response: {
             friend_request: FriendsInvitations;
@@ -195,12 +197,14 @@ export class FriendsController {
      *
      * @param {number} receiver_id - The ID of the user accepting the friend request (receiver).
      * @param {number} sender_id - The ID of the user who sent the friend request (sender).
+     * @param {AcceptFriendRequestDto} acceptFriendRequestDto - The DTO containing the details of the friend request acceptance.
      * @return {Object} Returns an object with a message confirming the friend request acceptance.
      */
     @Patch('accept-friend-request/:sender_id')
     async acceptFriendRequest(
         @ExtractUserData('id') receiver_id: number,
         @Param('sender_id', ParseIntPipe) sender_id: number,
+        @Body() acceptFriendRequestDto: AcceptFriendRequestDto,
     ): Promise<{
         response: {
             message: string;
@@ -240,6 +244,7 @@ export class FriendsController {
     async rejectFriendRequest(
         @ExtractUserData('id') receiver_id: number,
         @Param('sender_id', ParseIntPipe) sender_id: number,
+        @Body() rejectFriendRequestDto: RejectFriendRequestDto
     ): Promise<{
         response: {
             message: string;
@@ -278,6 +283,7 @@ export class FriendsController {
     async cancelFriendRequest(
         @ExtractUserData('id') sender_id: number,
         @Param('receiver_id', ParseIntPipe) receiver_id: number,
+        @Body() cancelFriendRequestDto: CancelFriendRequestDto
     ): Promise<{
         response: {
             message: string;
@@ -311,6 +317,7 @@ export class FriendsController {
     async removeFriend(
         @ExtractUserData('id') user_id: number,
         @Param('friend_id', ParseIntPipe) friend_id: number,
+        @Body() removeFriendDto: RemoveFriendDto
     ): Promise<{
         response: {
             message: string;

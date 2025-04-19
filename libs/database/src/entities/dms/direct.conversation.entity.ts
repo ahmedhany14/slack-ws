@@ -6,7 +6,7 @@ import { DirectConversationMessages } from './direct.conversations.messges.entit
 @Entity('direct_conversations')
 export class DirectConversation extends AbstractEntity<DirectConversation> {
 
-    // TODO: add the last message sent in the conversation to appear in the list of conversations
+    // DONE: add the last message sent in the conversation to appear in the list of conversations
     @Column({
         type: 'varchar',
         length: 2048,

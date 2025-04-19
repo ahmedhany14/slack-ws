@@ -1,3 +1,4 @@
+import { IsExistUser } from "@app/validators";
 import { IsNotEmpty, IsOptional, IsPositive, IsString, MaxLength } from "class-validator";
 
 
@@ -9,11 +10,11 @@ export class SendDmMessageDto {
 
     @IsPositive()
     @IsNotEmpty()
-    //@IsExistUser() // TODO: add this validator 
+    @IsExistUser() // DONE: add this validator 
     conversation_initiator: number;
 
     @IsPositive()
     @IsNotEmpty()
-    //@IsExistUser() // TODO: add this validator
+    @IsExistUser() // DONE: add this validator
     conversation_recipient: number;
 }
