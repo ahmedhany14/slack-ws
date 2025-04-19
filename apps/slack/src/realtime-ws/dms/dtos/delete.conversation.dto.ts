@@ -1,5 +1,5 @@
 import { IsNumber, IsPositive } from "class-validator";
-import { IsExistConversation } from "../../validators/is.exist.conversation.validator";
+import { IsExistConversation } from "@app/validators";
 
 export class DeleteConversationDto {
 

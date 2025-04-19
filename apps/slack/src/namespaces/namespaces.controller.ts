@@ -1,6 +1,7 @@
-import { AllowedServerUpdateGuard, AuthGuard } from '@app/auth.common';
+import { AuthGuard } from '@app/auth.common';
 import {
     Body,
+    ConflictException,
     Controller,
     Get,
     Inject,
@@ -13,6 +14,7 @@ import {
 import { NamespacesService } from './namespaces.service';
 import { Namespaces } from '@app/database';
 import { CreateNamespaceDto } from './dtos/create.namespace.dto';
+import { GetServerNameSpacesDto } from './dtos/get.server.name.spaces.dto';
 
 @Controller('namespaces')
 export class NamespacesController {
@@ -21,17 +23,17 @@ export class NamespacesController {
     constructor(
         @Inject()
         private readonly namespacesService: NamespacesService,
-    ) {}
+    ) { }
 
     /**
      * Creates a namespace associated with a specific server.
-     * Logs the operation and delegates to the namespace service to perform the creation.
+     * Logs the operation and delegate to the namespace service to perform the creation.
      *
      * @param {number} server_id - The ID of the server on which the namespace will be created.
      * @param {CreateNamespaceDto} createNamespaceDto - The data transfer object that contains the details of the namespace to be created.
      * @returns {Promise<{ response: { namespace: Namespaces } }>} - A promise that resolves to an object containing the created namespace.
      */
-    @UseGuards(AuthGuard, AllowedServerUpdateGuard)
+    @UseGuards(AuthGuard)
     @Post(':id')
     async createNamespace(
         @Param('id', ParseIntPipe) server_id: number,
@@ -51,8 +53,7 @@ export class NamespacesController {
         };
     }
     /*
-     TODO: authentication and authorization guards
-     TODO: Server should exist Decorator (in body)
+     DONE: Server should exist Decorator (in body)
      TODO: User should be a member of the servers to get all namespaces on this servers
      */
     /**
@@ -62,9 +63,16 @@ export class NamespacesController {
      * @return {Promise<{ response: { namespaces: Namespaces[] } }>} A promise that resolves to an object containing the namespaces.
      */
     @Get(':server_id')
-    async getNamespaces(
+    async getServerNamespaces(
         @Param('server_id', ParseIntPipe) server_id: number,
+        @Body() getServerNameSpacesDto: GetServerNameSpacesDto
     ): Promise<{ response: { namespaces: Namespaces[] } }> {
+        if (server_id != getServerNameSpacesDto.server_id) {
+            throw new ConflictException({
+                message: 'server_id in body and url should be same',
+            })
+        }
+
         this.logger.log(`getting namespaces on server, id: ${server_id}`);
 
         const namespaces = await this.namespacesService.find({

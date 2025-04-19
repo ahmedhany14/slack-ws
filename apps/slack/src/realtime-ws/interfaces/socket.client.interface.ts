@@ -1,3 +1,4 @@
+import { DirectConversation, DirectConversationMessages } from '@app/database';
 import { JwtPayload } from './jwt.interface';
 import { Socket } from 'socket.io';
 
@@ -8,5 +9,7 @@ export interface SocketI extends Socket {
             id: number;
             username: string;
         };
+        conversation?: DirectConversation
+        message?: DirectConversationMessages
     };
 }

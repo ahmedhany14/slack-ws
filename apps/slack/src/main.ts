@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { SlackModule } from './slack.module';
 import { Transport } from '@nestjs/microservices';
 import { ValidationPipe } from '@nestjs/common';
-import * as cookieParser from 'cookie-parser';
+import { useContainer } from 'class-validator';
 
 async function bootstrap() {
     const app = await NestFactory.create(SlackModule);
@@ -14,12 +14,6 @@ async function bootstrap() {
         },
     });
 
-    app.use(
-        cookieParser({
-            maxAge: 60 * 60 * 24 * 7, // 1 week
-            httpOnly: true,
-        }),
-    );
 
     app.useGlobalPipes(
         new ValidationPipe({
@@ -35,6 +29,7 @@ async function bootstrap() {
     await app.startAllMicroservices().then(() => {
         console.log('Slack microservice is running');
     });
+    useContainer(app.select(SlackModule), { fallbackOnErrors: true });
 
     await app.listen(process.env.SLACK_HTTP_PORT ?? 3000);
 }

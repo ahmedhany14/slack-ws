@@ -40,7 +40,7 @@ export class JwtVerifyGuard implements CanActivate {
         const user = await this.accountService.findOne({ id: payload.id });
         if (!user) throw new NotFoundException('Account not found');
 
-        this.logger.log('user found in JwtVerifyGuard', user);
+        this.logger.log('user found in JwtVerifyGuard', JSON.stringify(user));
         request.user = {
             id: user.id,
             username: user.username,

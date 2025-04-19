@@ -7,6 +7,7 @@ import { AUTH_SERVICE } from '@app/constants';
 
 import { ServerService } from './server.service';
 import { ServerController } from './server.controller';
+import { IsExistConversationValidator } from '@app/validators';
 
 @Module({
     imports: [
@@ -18,20 +19,19 @@ import { ServerController } from './server.controller';
                 imports: [ConfigModule],
                 inject: [ConfigService],
                 name: AUTH_SERVICE,
-                useFactory: (configService: ConfigService) => (
-                    {
-                        transport: Transport.TCP,
-                        options: {
-                            host: configService.authAppConfig?.hostname,
-                            port: configService.authAppConfig?.tcpPort,
-                        },
-                    }
-                ),
+                useFactory: (configService: ConfigService) => ({
+                    transport: Transport.TCP,
+                    options: {
+                        host: configService.authAppConfig?.hostname,
+                        port: configService.authAppConfig?.tcpPort,
+                    },
+                }),
             },
-        ]),
+
+        ], ),
     ],
     controllers: [ServerController],
     providers: [ServerService],
     exports: [ServerService],
 })
-export class ServerModule { }
+export class ServerModule {}

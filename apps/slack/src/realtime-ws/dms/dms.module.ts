@@ -1,18 +1,31 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { DmsController } from './dms.controller';
-import { DmsGateway } from './dms.gateway';
-import { DmsService } from './dms.service';
+
+// database
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { DirectConversation } from '@app/database';
+import { DirectConversation, DirectConversationMessages } from '@app/database';
+
+// modules
 import { RealtimeWsModule } from '../realtime-ws.module';
+import { FriendsModule } from '../../friends/friends.module';
+
+// service
+import { DmsMessagesService } from './services/dms.messages.service';
+import { DmsGateway } from './dms.gateway';
+import { DmsService } from './services/dms.service';
+
+// microservices
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigModule, ConfigService } from '@app/config';
 import { AUTH_SERVICE } from '@app/constants';
+import { IsExistConversationValidator, IsExistMessageValidator } from '@app/validators';
+
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([DirectConversation]),
+        TypeOrmModule.forFeature([DirectConversation, DirectConversationMessages]),
         forwardRef(() => RealtimeWsModule), // to avoid circular dependency
+        FriendsModule,
         ClientsModule.registerAsync([
             // auth service
             {
@@ -30,7 +43,7 @@ import { AUTH_SERVICE } from '@app/constants';
         ]),
     ],
     controllers: [DmsController],
-    providers: [DmsGateway, DmsService],
+    providers: [DmsGateway, DmsService, DmsMessagesService, IsExistMessageValidator, IsExistConversationValidator],
     exports: [DmsService],
 })
 export class DmsModule { }
