@@ -19,7 +19,7 @@ import { DirectConversationMessages } from '@app/database';
 
 // guards
 import { WsIsYourConversationGuard } from '../common/guards/ws.is.your.conversation.guard';
-import { WsIsMeassageBelongToConversationGuard } from '../common/guards/ws.is.message.belong.to.conversation.guard';
+import { WsIsMessageBelongToConversationGuard } from '../common/guards/ws.is.message.belong.to.conversation.guard';
 import { WsAuthGuard } from '../guards/ws.auth.guard';
 
 // decorators
@@ -33,7 +33,7 @@ import { DmsService } from '../dms/dms.service';
 // filters
 import { WsExceptionsFilter } from '@app/interceptors';
 import { Server } from 'socket.io';
-import { MarkMessageAsReadDto } from './dtos/mark.message.as-read.dto';
+import { MarkMessageAsDeliveredDto, MarkMessageAsReadDto } from './dtos/mark.message.as-read.dto';
 
 @UseFilters(new WsExceptionsFilter())
 @UsePipes(
@@ -83,18 +83,61 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
             this.logger.log('user:messages:', `user:messages:${client.data.user.id}`);
 
             client.join(`user:messages:${client.data.user.id}`);
+
+            /*
+             // OK: emit all unread and mark them as read for the sender
+             Some explanations:
+             * any unread message can be delivered and undelivered
+             * so instead of sending unread and undelivered messages, we can send all unread messages
+             * this will guarantee that the sender will receive all unread and undelivered messages
+             */
+            await this.emitUnreadMessages(client);
         } catch (error) {
-            this.logger.log('Connection error');
+            console.log('Connection error', error);
             client.emit('error', {
-                message:
-                    error instanceof WsException
-                        ? error.getError().toString()
-                        : 'Authentication failed',
+                message: 'Unexpected error occurred',
             });
             client.disconnect();
         } finally {
             this.logger.log(`Client connected to messages: ${client.id}`);
         }
+    }
+
+    private async emitUnreadMessages(client: SocketI) {
+        /*
+         Logic:
+         1) we will fetch all unread messages for user
+         2) mark any undelivered messages as delivered
+         3) emit to the sender of the message that messages are delivered
+         4) emit the unread messages to the user
+         */
+
+        // fetch all unread messages for user
+        let unreadMessages = await this.dmsMessagesService.find({
+            receiver: { id: client.data.user?.id },
+        });
+
+        // mark all undelivered messages as delivered
+        for (const message of unreadMessages) {
+            if (!message.delivered) {
+                await this.dmsMessagesService.findOneAndUpdate(
+                    { id: message.id },
+                    { delivered: true },
+                );
+                // emit to the sender of the message that messages are delivered
+                this.server.to(`user:messages:${message.creator.id}`).emit('delivered:message', {
+                    message_id: message.id,
+                    conversation_id: message.conversation.id,
+                    delivered: true,
+                });
+                message.delivered = true;
+            }
+        }
+
+        // emit the unread messages to the user
+        this.server.to(`user:messages:${client.data.user?.id}`).emit('unread:messages', {
+            messages: unreadMessages,
+        });
     }
 
     handleDisconnect(client: SocketI) {
@@ -123,12 +166,8 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
         );
 
         await this.dmsService.findOneAndUpdate(
-            {
-                id: conversation.id,
-            },
-            {
-                last_message: sendDmMessageDto.content,
-            },
+            { id: conversation.id },
+            { last_message: sendDmMessageDto.content },
         );
 
         // FIXME: here is and concurrency issue in last_message
@@ -139,9 +178,10 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
             content: sendDmMessageDto.content,
             conversation,
             creator: { id: conversation_initiator },
+            receiver: { id: sendDmMessageDto.conversation_recipient },
         } as DirectConversationMessages);
 
-        // emit the message to the conversation
+        // emit the message to the recipient conversation
         this.server
             .to(`user:messages:${sendDmMessageDto.conversation_recipient}`)
             .emit('receive:direct-message', {
@@ -158,24 +198,46 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
      * This event will be used to mark messages as read
      *
      * @param client
-     * @param markMessageAsReadDto
+     * @param _markMessageAsReadDto
      * @emits mark:messages-as-read to the recipient
      */
-    @UseGuards(WsAuthGuard, WsIsYourConversationGuard, WsIsMeassageBelongToConversationGuard)
+    @UseGuards(WsAuthGuard, WsIsYourConversationGuard, WsIsMessageBelongToConversationGuard)
     @SubscribeMessage('mark:messages-as-read')
     async markMessagesAsRead(
         @ConnectedSocket() client: SocketI,
-        @MessageBody() markMessageAsReadDto: MarkMessageAsReadDto // form validation
+        @MessageBody() _markMessageAsReadDto: MarkMessageAsReadDto, // form validation
     ) {
         const { user, conversation, message } = client.data;
 
         const reader_message = await this.dmsMessagesService.findOneAndUpdate(
-            {
-                id: message?.id,
-            },
-            {
-                marked: true,
-            },
+            { id: message?.id },
+            { marked: true },
+        );
+        const to =
+            user?.id === conversation?.conversation_initiator.id
+                ? conversation?.conversation_recipient.id
+                : conversation?.conversation_initiator.id;
+
+        // emit the message to the recipient conversation
+        this.server.to(`user:messages:${to}`).emit('read:message', {
+            conversation_id: conversation?.id,
+            message_id: message?.id,
+            reader_id: user?.id,
+            message: reader_message,
+        });
+    }
+
+    @UseGuards(WsAuthGuard, WsIsYourConversationGuard, WsIsMessageBelongToConversationGuard)
+    @SubscribeMessage('mark:message-as-delivered')
+    async markMessageAsDelivered(
+        @ConnectedSocket() client: SocketI,
+        @MessageBody() _markMessageAsDeliveredDto: MarkMessageAsDeliveredDto, // form validation
+    ) {
+        const { user, conversation, message } = client.data;
+
+        const delivered_message = await this.dmsMessagesService.findOneAndUpdate(
+            { id: message?.id },
+            { delivered: true },
         );
 
         const to =
@@ -183,11 +245,12 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
                 ? conversation?.conversation_recipient.id
                 : conversation?.conversation_initiator.id;
 
-        this.server.to(`user:messages:${to}`).emit('mark:messages-as-read', {
+        // emit the message to the recipient conversation
+        this.server.to(`user:messages:${to}`).emit('delivered:message', {
             conversation_id: conversation?.id,
             message_id: message?.id,
-            reader_id: user?.id,
-            message: reader_message,
+            delivered: true,
+            message: delivered_message,
         });
     }
 

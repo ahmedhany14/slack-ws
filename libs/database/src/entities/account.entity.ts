@@ -15,7 +15,6 @@ export class Account extends AbstractEntity<Account> {
     })
     username: string;
 
-    // TODO: Make this field non-selectable in the future
     @Column({
         type: 'varchar',
         length: 255,
@@ -33,21 +32,25 @@ export class Account extends AbstractEntity<Account> {
         lazy: true,
         onDelete: 'CASCADE',
     })
-    server_subscribtions: Promise<Subscribers[]>;
+    server_subscriptions: Promise<Subscribers[]>;
 
-
-    @OneToMany(() => FriendsInvitations, (invitations) => invitations.sender, { // will used to get add request i made 
+    // will use to get add request I made
+    @OneToMany(() => FriendsInvitations, (invitations) => invitations.sender, {
         lazy: true,
         onDelete: 'CASCADE',
     })
     add_request: Promise<FriendsInvitations[]>
 
-    @OneToMany(() => FriendsInvitations, (invitations) => invitations.receiver, { // will used to get add request i received
+    //will use to get add request I received
+    @OneToMany(() => FriendsInvitations, (invitations) => invitations.receiver, {
         lazy: true,
         onDelete: 'CASCADE',
     })
     friend_requests: Promise<FriendsInvitations[]>;
 
-    @OneToMany(() => DirectConversationMessages, (dmsm) => dmsm.creator) // user dms massages sended by him
-    messages: Promise<DirectConversationMessages[]>
+    @OneToMany(() => DirectConversationMessages, (dms) => dms.creator) // user dms massages sent by him
+    created_messages: Promise<DirectConversationMessages[]>
+
+    @OneToMany(() => DirectConversationMessages, (dms) => dms.receiver) // user dms massages sent to him
+    received_messages: Promise<DirectConversationMessages[]>
 }

@@ -1,9 +1,7 @@
 import { IsExistConversation, IsExistMessage } from "@app/validators";
 import { IsNumber, IsPositive } from "class-validator";
 
-
-export class MarkMessageAsReadDto {
-
+class MarkMessage {
     @IsNumber()
     @IsPositive()
     @IsExistMessage()
@@ -14,3 +12,7 @@ export class MarkMessageAsReadDto {
     @IsExistConversation()
     conversation_id: number;
 }
+
+export class MarkMessageAsReadDto extends MarkMessage {}
+
+export class MarkMessageAsDeliveredDto extends MarkMessage {}

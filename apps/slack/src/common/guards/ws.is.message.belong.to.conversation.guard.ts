@@ -6,8 +6,8 @@ import { MessagesService } from '../../messages/messages.service';
 import { DirectConversation } from '@app/database';
 
 
-export class WsIsMeassageBelongToConversationGuard implements CanActivate {
-    private readonly logger = new Logger(WsIsMeassageBelongToConversationGuard.name);
+export class WsIsMessageBelongToConversationGuard implements CanActivate {
+    private readonly logger = new Logger(WsIsMessageBelongToConversationGuard.name);
 
     constructor(
         @Inject() private readonly dmsMessagesService: MessagesService
