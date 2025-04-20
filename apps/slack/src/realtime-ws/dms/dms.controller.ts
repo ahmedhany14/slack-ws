@@ -9,6 +9,7 @@ import {
     Logger,
     Inject,
     Query,
+    ParseIntPipe, DefaultValuePipe,
 } from '@nestjs/common';
 
 // guards
@@ -22,7 +23,6 @@ import { DmsService } from './services/dms.service';
 import { DeleteConversationDto } from './dtos/delete.conversation.dto';
 import { DirectConversation, DirectConversationMessages } from '@app/database';
 import { IsYourConversationGuard } from './guards/is.your.conversation.guard';
-import { PaginationDto } from '@app/validators';
 import { DmsMessagesService } from './services/dms.messages.service';
 
 @UseGuards(AuthGuard)
@@ -35,7 +35,7 @@ export class DmsController {
         private readonly dmsService: DmsService,
         @Inject()
         private readonly dmsMessagesService: DmsMessagesService,
-    ) { }
+    ) {}
 
     /**
      * Retrieves all conversations associated with the given user ID.
@@ -46,19 +46,19 @@ export class DmsController {
     @Get()
     async getMyConversations(@ExtractUserData('id') id: number): Promise<
         | {
-            response: {
-                conversations: {
-                    id: number;
-                    conversation_recipient: {
-                        id: number;
-                        username: string;
-                    };
-                    created_at: Date;
-                    updated_at: Date;
-                    last_message: string;
-                };
-            }[];
-        }
+              response: {
+                  conversations: {
+                      id: number;
+                      conversation_recipient: {
+                          id: number;
+                          username: string;
+                      };
+                      created_at: Date;
+                      updated_at: Date;
+                      last_message: string;
+                  };
+              }[];
+          }
         | {}
     > {
         this.logger.log(`User ${id} is requesting all his conversations`);
@@ -71,7 +71,6 @@ export class DmsController {
         };
     }
 
-    // DONE: Authorize that the conversation exists and the user is part of it
     /**
      * Deletes a specific conversation based on its identifier.
      * Validates that the conversation ID provided in the request body matches the one in the URL.
@@ -84,7 +83,7 @@ export class DmsController {
     @UseGuards(IsYourConversationGuard)
     @Delete(':conversation_id')
     async deleteConversation(
-        @Param('conversation_id') conversation_id: number,
+        @Param('conversation_id', ParseIntPipe) conversation_id: number,
         @Body() deleteConversationDto: DeleteConversationDto,
     ): Promise<{
         response: {
@@ -111,7 +110,6 @@ export class DmsController {
         };
     }
 
-    // DONE: implement endpoint to retrieve conversation metadata, like mutual friends, etc...
     /**
      * Retrieves metadata about a specific conversation including mutual friends between the participants.
      *
@@ -149,8 +147,6 @@ export class DmsController {
         };
     }
 
-    // DONE: implement endpoint to retrieve conversation messages by page
-    // DONE: test endpoint after implementing ws storing messages
     /**
      * Retrieves messages for a specified conversation based on the provided conversation data and pagination details.
      *
@@ -162,7 +158,7 @@ export class DmsController {
     @Get('messages/:conversation_id')
     async getConversationMessages(
         @ExtractConversationData() conversation: DirectConversation,
-        @Query('page') page: number,
+        @Query('page',new DefaultValuePipe(1) ,ParseIntPipe) page: number,
     ): Promise<{
         response: DirectConversationMessages[];
         meta: {
@@ -173,22 +169,34 @@ export class DmsController {
             hasMore: boolean;
         };
     }> {
-        this.logger.log(`User is requesting messages for conversation ${conversation.id}`);
+        this.logger.log(`User is requesting messages for conversation ${conversation}`);
 
-
-        return this.dmsMessagesService.findConversationMessages(
-            conversation,
-            page,
-        );
+        return this.dmsMessagesService.findConversationMessages(conversation, page);
     }
 
-    // TODO: implement endpoint to delete message
     /**
-     * Endpoint to delete message
-     * Authorize that the conversation exists and the user is part of it
-     * Authorize that the message exists and belongs to the conversation
-     * Authorize that the creator of the message is the user
-     * @param message_id
-     * @return message deleted
+     * Handles the deletion of a message identified by its ID.
+     *
+     * @param {number} message_id - The ID of the message to be deleted.
+     * @return {Promise<{response: {message: string}}>} A promise that resolves with an object containing a success message.
      */
+    @UseGuards(IsYourConversationGuard)
+    @Delete('message/:conversation_id/:message_id')
+    async deleteMessage(@Param('message_id', ParseIntPipe) message_id: number): Promise<{
+        response: {
+            message: string;
+        };
+    }> {
+        this.logger.log(`User is requesting to delete message, with id ${message_id}`);
+
+        await this.dmsMessagesService.findOneAndDelete({
+            id: message_id,
+        });
+
+        return {
+            response: {
+                message: 'Message deleted',
+            },
+        };
+    }
 }
