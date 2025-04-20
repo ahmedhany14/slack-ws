@@ -14,8 +14,8 @@ import { Server, Socket } from 'socket.io';
 // interfaces and dtos
 import { IWsAuthenticateRequest } from '@app/auth.common';
 import { SocketI } from '../interfaces/socket.client.interface';
-import { SendFriendRequestDto } from './dtos/friend.reques.id.validators.dto';
-import { FriendsInvitations } from '@app/database';
+import { AcceptFriendRequestDto, SendFriendRequestDto, RejectFriendRequestDto } from './dtos/friend.reques.id.validators.dto';
+import { FriendsInvitations, RequestStatus } from '@app/database';
 
 // filters
 import { WsExceptionsFilter } from '@app/interceptors';
@@ -27,6 +27,7 @@ import { WsAuthenticateUserService } from '../common/ws.authenticate.user.servic
 // guards
 import { WsAuthGuard } from '../guards/ws.auth.guard';
 import { CanYouSendFriendRequestGuard } from './guards/can.you.send.friend.request.guard';
+import { CanYouAcceptOrRejectFriendRequestGuard } from './guards/can.you.accept.or.reject.friend.request.guard';
 
 @UseFilters(new WsExceptionsFilter())
 @UsePipes(
@@ -133,14 +134,69 @@ export class FriendsGateway implements OnGatewayConnection, OnGatewayDisconnect 
     }
 
     // require emit to the invitation sender that some user accepted his invitation
+    @UseGuards(WsAuthGuard, CanYouAcceptOrRejectFriendRequestGuard)
     @SubscribeMessage('friend:accept:request')
-    async acceptFriendInvitation() { }
+    async acceptFriendInvitation(
+        @ConnectedSocket() client: SocketI,
+        @MessageBody() acceptFriendRequestDto: AcceptFriendRequestDto,
+    ) {
+        this.logger.log(`accepting friend request from ${client.data.user?.id} to ${acceptFriendRequestDto.sender_id}`);
+        const sender_id = acceptFriendRequestDto.sender_id,
+            receiver_id = client.data.user?.id as number;
+
+
+        let accepted_request = await this.friendsService.findOneAndUpdate({
+            sender: { id: sender_id },
+            receiver: { id: receiver_id },
+            request_status: RequestStatus.PENDING
+        }, {
+            request_status: RequestStatus.ACCEPTED
+        });
+        accepted_request = await this.friendsService.findOne({
+            sender: { id: sender_id },
+            receiver: { id: receiver_id },
+            request_status: RequestStatus.ACCEPTED
+        } as FriendsInvitations);
+
+        // emit senders that the request was accepted
+        this.server
+            .to(`user:friends:request:ws:${acceptFriendRequestDto.sender_id}`) // send to the sender
+            .emit('friend:request:accepted', {
+                message: `Your friend request was accepted by ${client.data.user?.username}`,
+                friend_request: accepted_request,
+            })
+    }
 
 
     // will be rejected and removed from both sides but without message to the sender 
     // will be done by the request receiver
+    @UseGuards(WsAuthGuard, CanYouAcceptOrRejectFriendRequestGuard)
     @SubscribeMessage('friend:reject:request')
-    async rejectFriendInvitation() { }
+    async rejectFriendInvitation(
+        @ConnectedSocket() client: SocketI,
+        @MessageBody() rejectFriendRequestDto: RejectFriendRequestDto,
+    ) {
+        const sender_id = rejectFriendRequestDto.sender_id,
+            receiver_id = client.data.user?.id as number;
+
+        this.logger.log(`rejecting friend request from ${client.data.user?.id} to ${rejectFriendRequestDto.sender_id}`);
+
+        const rejected_request = await this.friendsService.findOneAndUpdate({
+            sender: { id: sender_id },
+            receiver: { id: receiver_id },
+            request_status: RequestStatus.PENDING
+        }, {
+            request_status: RequestStatus.REJECTED
+        });
+
+        this.server
+            .to(`user:friends:request:ws:${receiver_id}`)
+            .emit('friend:request:rejected', {
+                message: `you rejected the friend request from ${client.data.user?.username}`,
+                friend_request: rejected_request,
+            })
+
+    }
 
     // will be canceled and removed from both sides but without message to the sender
     // will be done by the request sender
