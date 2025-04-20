@@ -14,6 +14,8 @@ import { Server, Socket } from 'socket.io';
 // interfaces and dtos
 import { IWsAuthenticateRequest } from '@app/auth.common';
 import { SocketI } from '../interfaces/socket.client.interface';
+import { SendFriendRequestDto } from './dtos/friend.reques.id.validators.dto';
+import { FriendsInvitations } from '@app/database';
 
 // filters
 import { WsExceptionsFilter } from '@app/interceptors';
@@ -21,6 +23,10 @@ import { WsExceptionsFilter } from '@app/interceptors';
 // services
 import { FriendsService } from './friends.service';
 import { WsAuthenticateUserService } from '../common/ws.authenticate.user.service';
+
+// guards
+import { WsAuthGuard } from '../guards/ws.auth.guard';
+import { CanYouSendFriendRequestGuard } from './guards/can.you.send.friend.request.guard';
 
 @UseFilters(new WsExceptionsFilter())
 @UsePipes(
@@ -70,6 +76,7 @@ export class FriendsGateway implements OnGatewayConnection, OnGatewayDisconnect 
             };
             client.data.user = await this.wsAuthenticateUserService.authenticate(request);
             client.join(`user:friends:ws:${client.data.user.id}`);
+            client.join(`user:friends:request:ws:${client.data.user.id}`);
 
             // OK: list all friends on connection
             this.emitListFriends(client);
@@ -101,27 +108,48 @@ export class FriendsGateway implements OnGatewayConnection, OnGatewayDisconnect 
 
 
     // require emit to the invitation receiver that some user sent an invitation
-    @SubscribeMessage('send:friend:invitation')
-    async sendFriendInvitation() { }
+    @UseGuards(WsAuthGuard, CanYouSendFriendRequestGuard)
+    @SubscribeMessage('send:friend:request')
+    async sendFriendInvitation(
+        @ConnectedSocket() client: SocketI,
+        @MessageBody() sendFriendRequestDto: SendFriendRequestDto,
+    ) {
+        this.logger.log(`sending friend request from ${client.data.user?.id} to ${sendFriendRequestDto.receiver_id}`);
+        const sender_id = client.data.user?.id as number,
+            receiver_id = sendFriendRequestDto.receiver_id;
+
+
+        const friend_request = await this.friendsService.create({
+            sender: { id: sender_id },
+            receiver: { id: receiver_id },
+        } as FriendsInvitations)
+
+        this.server
+            .to(`user:friends:request:ws:${sendFriendRequestDto.receiver_id}`) // send to the receiver
+            .emit('friend:request:received', {
+                message: `You have a new friend request from ${client.data.user?.username}`,
+                friend_request,
+            })
+    }
 
     // require emit to the invitation sender that some user accepted his invitation
-    @SubscribeMessage('accept:friend:invitation')
+    @SubscribeMessage('friend:accept:request')
     async acceptFriendInvitation() { }
 
 
     // will be rejected and removed from both sides but without message to the sender 
     // will be done by the request receiver
-    @SubscribeMessage('reject:friend:invitation')
+    @SubscribeMessage('friend:reject:request')
     async rejectFriendInvitation() { }
 
     // will be canceled and removed from both sides but without message to the sender
     // will be done by the request sender
-    @SubscribeMessage('cancel:friend:invitation')
+    @SubscribeMessage('friend:cancel:request')
     async cancelFriendInvitation() { }
 
 
     // will remove the friend also from both sides
     // both sender and receiver can do this
-    @SubscribeMessage('remove:friend')
+    @SubscribeMessage('friend:remove')
     async removeFriend() { }
 }
