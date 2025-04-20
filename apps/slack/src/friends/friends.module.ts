@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
@@ -8,11 +8,14 @@ import { AUTH_SERVICE } from '@app/constants';
 
 import { FriendsController } from './friends.controller';
 import { FriendsService } from './friends.service';
+import { FriendsGateway } from './friends.gateway';
+import { SlackModule } from '../slack.module';
 
 
 @Module({
     imports: [
         DatabaseModule,
+        forwardRef(() => SlackModule),
         TypeOrmModule.forFeature([
             FriendsInvitations
         ]),
@@ -37,7 +40,7 @@ import { FriendsService } from './friends.service';
     controllers: [
         FriendsController
     ],
-    providers: [FriendsService],
+    providers: [FriendsService, FriendsGateway],
     exports: [FriendsService]
 
 })

@@ -1,69 +1,70 @@
 services:
-  auth:
-    image: auth
-    build:
-      context: .
-      dockerfile: ./apps/auth/Dockerfile
-      target: dev
-    command: pnpm run start:dev auth
-    ports:
-      - '8080:8080'
-    env_file:
-      - .dev.env
-    volumes:
-      - .:/app
-    depends_on:
-      - postgres
+    auth:
+        image: auth
+        build:
+            context: .
+            dockerfile: ./apps/auth/Dockerfile
+            target: dev
+        command: pnpm run start:dev auth
+        ports:
+            - '8080:8080'
+        env_file:
+            - .dev.env
+        volumes:
+            - .:/app
+        depends_on:
+            - postgres
 
-  slack:
-    image: slack
-    build:
-      context: .
-      dockerfile: apps/slack/Dockerfile
-      target: dev
+    slack:
+        image: slack
+        build:
+            context: .
+            dockerfile: apps/slack/Dockerfile
+            target: dev
 
-    command: pnpm run start:dev slack
-    ports:
-      - '8082:8082'
-      - '3001:3001' # for dm ws
-      - '3002:3002' # for message ws
-    volumes:
-      - .:/app
-    env_file:
-      - .dev.env
-    depends_on:
-      - auth
-      - postgres
+        command: pnpm run start:dev slack
+        ports:
+            - '8082:8082'
+            - '3001:3001' # for dm ws
+            - '3002:3002' # for message ws
+            - '3003:3003' # for friend ws
+        volumes:
+            - .:/app
+        env_file:
+            - .dev.env
+        depends_on:
+            - auth
+            - postgres
 
-  postgres:
-    image: postgres:13
-    container_name: postgres_db
-    env_file:
-      - .dev.env
-    ports:
-      - '5434:5434'
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+    postgres:
+        image: postgres:13
+        container_name: postgres_db
+        env_file:
+            - .dev.env
+        ports:
+            - '5434:5434'
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
 
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: pgadmin
-    command: >
-      bash -c "
-        mkdir -p /var/log/pgadmin
-        exec /entrypoint.sh 2>/dev/null
-      "
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10k"
-        max-file: "1"
-    restart: always
-    ports:
-      - '5050:80'
-    env_file:
-      - .dev.env
-    depends_on:
-      - postgres
+    pgadmin:
+        image: dpage/pgadmin4
+        container_name: pgadmin
+        command: >
+            bash -c "
+              mkdir -p /var/log/pgadmin
+              exec /entrypoint.sh 2>/dev/null
+            "
+        logging:
+            driver: 'json-file'
+            options:
+                max-size: '10k'
+                max-file: '1'
+        restart: always
+        ports:
+            - '5050:80'
+        env_file:
+            - .dev.env
+        depends_on:
+            - postgres
 volumes:
-  postgres_data:
+    postgres_data:

@@ -5,6 +5,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { useContainer } from 'class-validator';
 import { WsMessagesAdapter } from './common/adapters/ws.messages.adapter';
 import { WsDmsAdapter } from './common/adapters/ws.dms.adapter';
+import { WsFriendsAdapter } from './common/adapters/ws.friends.adapter';
 
 async function bootstrap() {
     const app = await NestFactory.create(SlackModule);
@@ -36,6 +37,7 @@ async function bootstrap() {
     // WebSocket adapters
     app.useWebSocketAdapter(new WsDmsAdapter())
     app.useWebSocketAdapter(new WsMessagesAdapter());
+    app.useWebSocketAdapter(new WsFriendsAdapter());
 
     await app.listen(process.env.SLACK_HTTP_PORT ?? 3000);
 }
