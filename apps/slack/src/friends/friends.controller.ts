@@ -10,13 +10,29 @@ import {
     Patch,
     Post,
     UseGuards,
+    Body,
 } from '@nestjs/common';
+
+// services
 import { FriendsService } from './friends.service';
+
+// guards and decorators
 import { AuthGuard } from '@app/auth.common';
 import { ExtractUserData } from '@app/decorators';
+
+// entities
 import { FriendsInvitations, RequestStatus } from '@app/database';
-import { Body } from '@nestjs/common';
-import { AcceptFriendRequestDto, CancelFriendRequestDto, RejectFriendRequestDto, RemoveFriendDto, SendFriendRequestDto } from './dtos/friend.reques.id.validators.dto';
+
+// dtos and interfaces
+import {
+    AcceptFriendRequestDto,
+    CancelFriendRequestDto,
+    RejectFriendRequestDto,
+    RemoveFriendDto,
+    SendFriendRequestDto,
+} from './dtos/friend.reques.id.validators.dto';
+import { FriendsI } from './interfaces/friends.interfaces';
+import { InvitationsResponseData, MessagesResponseI } from './interfaces/respones.interface';
 
 @UseGuards(AuthGuard)
 @Controller('friends')
@@ -26,22 +42,17 @@ export class FriendsController {
     constructor(
         @Inject()
         private readonly friendsService: FriendsService,
-    ) { }
+    ) {}
 
     /**
      * Retrieves all friends for the specified user.
      *
      * @param {number} user_id - The ID of the user whose friends are to be retrieved.
-     * @return {Promise<{ response: { friends: { id: number; name: string; }[]; }; }>} - A promise that resolves to an object containing the list of friends.
+     * @return {Promise<{ response: { friends: FriendsI[] } }>} - A promise that resolves to an object containing the list of friends.
      */
     @Get('all-friends')
     async getAllFriends(@ExtractUserData('id') user_id: number): Promise<{
-        response: {
-            friends: {
-                id: number;
-                name: string;
-            }[];
-        };
+        response: { friends: FriendsI[] };
     }> {
         this.logger.log('getAllFriends of user_id = ', user_id);
 
@@ -58,24 +69,12 @@ export class FriendsController {
      * Retrieves all pending friend invitations for a given user.
      *
      * @param {number} user_id - The ID of the user whose pending friend invitations are to be retrieved.
-     * @return {Promise<Array<Object>>} A promise that resolves to a list of friend invitations. Each invitation includes:
-     *  - id: The ID of the invitation.
-     *  - sender: An object containing the sender's ID and username.
-     *  - request_status: The status of the friend invitation request.
+     * @return {Promise<{ response: InvitationsResponseData }>} - A promise that resolves to an object containing the list of pending friend invitations.
      */
     @Get('all-friends-invitations')
-    async getAllFriendsInvitations(@ExtractUserData('id') user_id: number): Promise<{
-        response: {
-            invitations: {
-                id: number;
-                sender: {
-                    id: number;
-                    username: string;
-                };
-                request_status: RequestStatus;
-            }[];
-        };
-    }> {
+    async getAllFriendsInvitations(
+        @ExtractUserData('id') user_id: number,
+    ): Promise<{ response: InvitationsResponseData }> {
         this.logger.log('getAllFriendsInvitations of user_id = ', user_id);
 
         const friends_invitations = await this.friendsService.find({
@@ -104,11 +103,9 @@ export class FriendsController {
      * @return {Promise<{ response: { pendingRequests: FriendsInvitations[]; }; }>} - A promise that resolves to an object containing the list of pending friend requests.
      */
     @Get('pending-friend-requests')
-    async getPendingFriendRequests(@ExtractUserData('id') user_id: number): Promise<{
-        response: {
-            pendingRequests: FriendsInvitations[];
-        };
-    }> {
+    async getPendingFriendRequests(
+        @ExtractUserData('id') user_id: number,
+    ): Promise<{ response: { pendingRequests: FriendsInvitations[] } }> {
         this.logger.log('getPendingFriendRequests of user_id = ', user_id);
 
         const pendingRequests = await this.friendsService.find({
@@ -125,28 +122,22 @@ export class FriendsController {
 
     /**
      * Handles the logic for sending a friend request from one user to another.
-     * Validates whether the friend request can be sent and creates a new record in the friends service if successful.
+     * Validates whether the friend request can be sent and creates a new record in the friend's service if successful.
      * Throws exceptions if the request cannot be completed due to various conflicts.
      *
      * @param {number} sender_id - The ID of the user sending the friend request.
      * @param {number} receiver_id - The ID of the user receiving the friend request.
-     * @param {SendFriendRequestDto} sendFriendRequesDto - The DTO containing the details of the friend request.
+     * @param _sendFriendRequestDto
      * @return {Promise<FriendsInvitations>} A promise that resolves with the new friend request invitation object if successful.
-     * @throws {ConflictException} If the sender attempts to send a request to themselves.
-     * @throws {ConflictException} If the sender and receiver are already friends.
-     * @throws {ConflictException} If the friend request has already been sent by the sender.
-     * @throws {ConflictException} If there is already a pending friend request from the receiver to the sender.
      */
     @Post('send-friend-request/:receiver_id')
     async addFriend(
         @ExtractUserData('id') sender_id: number,
         @Param('receiver_id', ParseIntPipe) receiver_id: number,
-        @Body() sendFriendRequesDto: SendFriendRequestDto,
-    ): Promise<{
-        response: {
-            friend_request: FriendsInvitations;
-        };
-    }> {
+        @Body() _sendFriendRequestDto: SendFriendRequestDto,
+    ): Promise<{ response: { friend_request: FriendsInvitations } }> {
+        //FIXME: Refactor this fucken shit code
+
         this.logger.log(
             `add friend where sender_id =  ${sender_id}, and receiver_id = ${receiver_id}`,
         );
@@ -197,18 +188,16 @@ export class FriendsController {
      *
      * @param {number} receiver_id - The ID of the user accepting the friend request (receiver).
      * @param {number} sender_id - The ID of the user who sent the friend request (sender).
-     * @param {AcceptFriendRequestDto} acceptFriendRequestDto - The DTO containing the details of the friend request acceptance.
-     * @return {Object} Returns an object with a message confirming the friend request acceptance.
+     * @param {AcceptFriendRequestDto} _acceptFriendRequestDto - The DTO containing the details of the friend request acceptance.
+     * @return {Promise<{ response: MessagesResponseI }>} - A promise that resolves to an object containing a message confirming the acceptance of the friend request.
      */
     @Patch('accept-friend-request/:sender_id')
     async acceptFriendRequest(
         @ExtractUserData('id') receiver_id: number,
         @Param('sender_id', ParseIntPipe) sender_id: number,
-        @Body() acceptFriendRequestDto: AcceptFriendRequestDto,
+        @Body() _acceptFriendRequestDto: AcceptFriendRequestDto,
     ): Promise<{
-        response: {
-            message: string;
-        };
+        response: MessagesResponseI;
     }> {
         this.logger.log(
             `acceptFriendRequest where sender_id = ${sender_id} and receiver_id = ${receiver_id}`,
@@ -237,6 +226,7 @@ export class FriendsController {
      *
      * @param {number} receiver_id - The ID of the user who is rejecting the friend request.
      * @param {number} sender_id - The ID of the user who sent the friend request.
+     * @param _rejectFriendRequestDto - The DTO containing the details of the friend request rejection.
      * @return {Object} Returns an object with a message confirming the rejection of the friend request.
      */
 
@@ -244,12 +234,8 @@ export class FriendsController {
     async rejectFriendRequest(
         @ExtractUserData('id') receiver_id: number,
         @Param('sender_id', ParseIntPipe) sender_id: number,
-        @Body() rejectFriendRequestDto: RejectFriendRequestDto
-    ): Promise<{
-        response: {
-            message: string;
-        };
-    }> {
+        @Body() _rejectFriendRequestDto: RejectFriendRequestDto,
+    ): Promise<{ response: MessagesResponseI }> {
         this.logger.log(
             `rejectFriendRequest where sender_id = ${sender_id} and receiver_id = ${receiver_id}`,
         );
@@ -277,18 +263,15 @@ export class FriendsController {
      *
      * @param {number} sender_id - The ID of the user who sent the friend request.
      * @param {number} receiver_id - The ID of the user to whom the friend request was sent.
-     * @return {Promise<Object>} A promise that resolves to an object containing a message confirming the cancellation of the friend request.
+     * @param _cancelFriendRequestDto - The DTO containing the details of the cancellation.
+     * @return {Promise<{ response: MessagesResponseI }>} - A promise that resolves to an object containing a message confirming the cancellation.
      */
     @Delete('cancel-friend-request/:receiver_id')
     async cancelFriendRequest(
         @ExtractUserData('id') sender_id: number,
         @Param('receiver_id', ParseIntPipe) receiver_id: number,
-        @Body() cancelFriendRequestDto: CancelFriendRequestDto
-    ): Promise<{
-        response: {
-            message: string;
-        };
-    }> {
+        @Body() _cancelFriendRequestDto: CancelFriendRequestDto,
+    ): Promise<{ response: MessagesResponseI }> {
         this.logger.log(
             `cancelFriendRequest where sender_id = ${sender_id} and receiver_id = ${receiver_id}`,
         );
@@ -311,18 +294,15 @@ export class FriendsController {
      *
      * @param {number} user_id - The ID of the user initiating the friend removal.
      * @param {number} friend_id - The ID of the friend to be removed.
-     * @return {Promise<{ message: string }>} A confirmation message indicating the friend has been removed.
+     * @param _removeFriendDto - The DTO containing the details of the removal.\
+     * @return {Promise<{ response: MessagesResponseI }>} - A promise that resolves to an object containing a message confirming the removal of the friend.
      */
     @Delete('remove-friend/:friend_id')
     async removeFriend(
         @ExtractUserData('id') user_id: number,
         @Param('friend_id', ParseIntPipe) friend_id: number,
-        @Body() removeFriendDto: RemoveFriendDto
-    ): Promise<{
-        response: {
-            message: string;
-        };
-    }> {
+        @Body() _removeFriendDto: RemoveFriendDto,
+    ): Promise<{ response: MessagesResponseI }> {
         this.logger.log(`removeFriend where user_id = ${user_id} and friend_id = ${friend_id}`);
 
         await this.friendsService.findOneAndUpdate(
