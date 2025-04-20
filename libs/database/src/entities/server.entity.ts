@@ -21,12 +21,6 @@ export class Server extends AbstractEntity<Server> {
     description: string;
 
     @Column({
-        type: 'timestamp with time zone',
-        default: () => 'CURRENT_TIMESTAMP',
-    })
-    created_at: Date;
-
-    @Column({
         type: 'bool',
         default: true
     })

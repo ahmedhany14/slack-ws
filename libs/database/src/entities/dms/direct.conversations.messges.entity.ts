@@ -23,19 +23,6 @@ export class DirectConversationMessages extends AbstractEntity<DirectConversatio
     })
     delivered: boolean;
 
-    @Column({
-        type: 'timestamp with time zone',
-        default: () => 'CURRENT_TIMESTAMP',
-    })
-    created_at: Date;
-
-    @Column({
-        type: 'timestamp with time zone',
-        nullable: true,
-        default: null,
-    })
-    updated_at: Date;
-
     @ManyToOne(() => Account, (account) => account.created_messages, {
         eager: true,
     })

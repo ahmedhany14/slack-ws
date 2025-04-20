@@ -1,5 +1,7 @@
 import { Entity, Column, JoinColumn, ManyToOne } from 'typeorm';
-import { AbstractEntity, Server, Account } from '@app/database';
+import { AbstractEntity } from './../abstract.entity';
+import { Server } from './server.entity';
+import { Account } from './account.entity';
 
 
 enum subscriberRole {
@@ -11,10 +13,9 @@ enum subscriberRole {
 @Entity('subscribers')
 export class Subscribers extends AbstractEntity<Subscribers> {
 
-    
     @ManyToOne(() => Account, (account) => account.server_subscriptions, {
         eager: true,
-        onDelete: 'CASCADE',    
+        onDelete: 'CASCADE',
     })
     @JoinColumn({ name: 'subscriber_id' })
     subscriber: Account;

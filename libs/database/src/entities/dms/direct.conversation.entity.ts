@@ -14,16 +14,6 @@ export class DirectConversation extends AbstractEntity<DirectConversation> {
     })
     last_message: string;
 
-    @CreateDateColumn({
-        type: 'timestamp with time zone'
-    })
-    created_at: Date;
-
-    @UpdateDateColumn({
-        type: 'timestamp with time zone'
-    })
-    updated_at: Date;
-
 
     @ManyToOne(() => Account, {
         eager: true,
