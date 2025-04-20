@@ -227,6 +227,13 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
         });
     }
 
+    /**
+     * Marks a specific message as delivered within a conversation and notifies the recipient.
+     *
+     * @param {SocketI} client - The connected WebSocket client, containing user, conversation, and message data.
+     * @param {MarkMessageAsDeliveredDto} _markMessageAsDeliveredDto - Data Transfer Object used for validating the message mark-as-delivered payload.
+     * @return {Promise<void>} Resolves when the message has been marked as delivered and an event is emitted to the recipient.
+     */
     @UseGuards(WsAuthGuard, WsIsYourConversationGuard, WsIsMessageBelongToConversationGuard)
     @SubscribeMessage('mark:message-as-delivered')
     async markMessageAsDelivered(
