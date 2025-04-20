@@ -62,7 +62,6 @@ export class DmsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     ) {}
 
     async handleConnection(client: SocketI) {
-        // TODO: add the user to the list of connected users
         try {
             // user authentication
             const request: IWsAuthenticateRequest = {
@@ -71,6 +70,19 @@ export class DmsGateway implements OnGatewayConnection, OnGatewayDisconnect {
             client.data.user = await this.wsAuthenticateUserService.authenticate(request);
             this.logger.log('user:direct-messages:', `user:direct-messages:${client.data.user.id}`);
             client.join(`user:direct-messages:${client.data.user.id}`);
+
+            // TODO: add the user to the list of connected users
+            /*
+             Will be implemented in the future
+             */
+
+            // TODO: emit the list of connected friends to the user
+            /*
+             Will be implemented in the future
+             */
+
+            // emit conversations to the user
+            await this.emitConversations(client);
         } catch (error) {
             this.logger.log('Connection error');
             client.emit('error', {
@@ -83,6 +95,18 @@ export class DmsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         } finally {
             this.logger.log(`Client connected to dms: ${client.id}`);
         }
+    }
+
+    /**
+     * emit conversations to the user
+     * @param client
+     */
+    private async emitConversations(client: SocketI) {
+        const conversations = await this.dmsService.findAllMyDms(client.data.user?.id as number);
+        this.logger.log('emitting conversations to user:', client.data.user?.id);
+        this.server.to(`user:direct-messages:${client.data.user?.id}`).emit('my:direct-messages', {
+            conversations: conversations,
+        });
     }
 
     handleDisconnect(client: Socket) {
