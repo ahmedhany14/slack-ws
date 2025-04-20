@@ -13,6 +13,7 @@ export class WsExceptionsFilter implements WsExceptionFilter {
         // Detailed logging
         this.logger.error('WebSocket Exception');
 
+        console.log(exception);
         // Standardize error response
         const errorResponse = {
             type: 'ws_error',
@@ -22,7 +23,7 @@ export class WsExceptionsFilter implements WsExceptionFilter {
             timestamp: new Date().toISOString()
         };
 
-        // Emit error to client
+        // Emit error to a client
         client.emit('error', errorResponse);
 
         client.disconnect();

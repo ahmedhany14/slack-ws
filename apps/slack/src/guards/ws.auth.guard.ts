@@ -1,6 +1,6 @@
 import { CanActivate, ExecutionContext, Inject, Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
-import { RealtimeWsAuthService } from '../realtime-ws.auth.service';
+import { WsAuthenticateUserService } from '../common/ws.authenticate.user.service';
 import { WsException } from '@nestjs/websockets';
 import { SocketI } from '../interfaces/socket.client.interface';
 
@@ -8,7 +8,7 @@ import { SocketI } from '../interfaces/socket.client.interface';
 export class WsAuthGuard implements CanActivate {
 
     constructor(
-        @Inject() private readonly realtimeWsAuthService: RealtimeWsAuthService
+        @Inject() private readonly wsAuthenticateUserService: WsAuthenticateUserService
     ) { }
 
     async canActivate(
@@ -16,8 +16,8 @@ export class WsAuthGuard implements CanActivate {
     ): Promise<boolean> {
         const client: SocketI = context.switchToWs().getClient();
 
-        const response = await this.realtimeWsAuthService.authenticate({
-            token: this.realtimeWsAuthService.extractToken(client),
+        const response = await this.wsAuthenticateUserService.authenticate({
+            token: this.wsAuthenticateUserService.extractToken(client),
         });
 
         if (!response) {

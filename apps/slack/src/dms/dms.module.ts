@@ -6,25 +6,25 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { DirectConversation, DirectConversationMessages } from '@app/database';
 
 // modules
-import { RealtimeWsModule } from '../realtime-ws.module';
-import { FriendsModule } from '../../friends/friends.module';
+import { FriendsModule } from '../friends/friends.module';
 
 // service
-import { DmsMessagesService } from './services/dms.messages.service';
+import { MessagesService } from '../messages/messages.service';
 import { DmsGateway } from './dms.gateway';
-import { DmsService } from './services/dms.service';
+import { DmsService } from './dms.service';
 
 // microservices
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigModule, ConfigService } from '@app/config';
 import { AUTH_SERVICE } from '@app/constants';
 import { IsExistConversationValidator, IsExistMessageValidator } from '@app/validators';
+import { SlackModule } from '../slack.module';
 
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([DirectConversation, DirectConversationMessages]),
-        forwardRef(() => RealtimeWsModule), // to avoid circular dependency
+        forwardRef(() => SlackModule),
+        TypeOrmModule.forFeature([DirectConversation]),
         FriendsModule,
         ClientsModule.registerAsync([
             // auth service
@@ -43,7 +43,7 @@ import { IsExistConversationValidator, IsExistMessageValidator } from '@app/vali
         ]),
     ],
     controllers: [DmsController],
-    providers: [DmsGateway, DmsService, DmsMessagesService, IsExistMessageValidator, IsExistConversationValidator],
+    providers: [DmsGateway, DmsService, IsExistMessageValidator, IsExistConversationValidator],
     exports: [DmsService],
 })
 export class DmsModule { }

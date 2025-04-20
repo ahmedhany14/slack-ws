@@ -3,6 +3,8 @@ import { SlackModule } from './slack.module';
 import { Transport } from '@nestjs/microservices';
 import { ValidationPipe } from '@nestjs/common';
 import { useContainer } from 'class-validator';
+import { WsMessagesAdapter } from './common/adapters/ws.messages.adapter';
+import { WsDmsAdapter } from './common/adapters/ws.dms.adapter';
 
 async function bootstrap() {
     const app = await NestFactory.create(SlackModule);
@@ -30,6 +32,10 @@ async function bootstrap() {
         console.log('Slack microservice is running');
     });
     useContainer(app.select(SlackModule), { fallbackOnErrors: true });
+
+    // WebSocket adapters
+    app.useWebSocketAdapter(new WsDmsAdapter())
+    app.useWebSocketAdapter(new WsMessagesAdapter());
 
     await app.listen(process.env.SLACK_HTTP_PORT ?? 3000);
 }

@@ -1,8 +1,8 @@
 import { CanActivate, ConflictException, ExecutionContext, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
-import { DmsService } from '../services/dms.service';
+import { DmsService } from '../../dms/dms.service';
 import { SocketI } from '../../interfaces/socket.client.interface';
-import { MarkMessageAsReadDto } from '../dtos/mark.message.as-read.dto';
-import { DmsMessagesService } from '../services/dms.messages.service';
+import { MarkMessageAsReadDto } from '../../messages/dtos/mark.message.as-read.dto';
+import { MessagesService } from '../../messages/messages.service';
 import { DirectConversation } from '@app/database';
 
 
@@ -10,7 +10,7 @@ export class WsIsMeassageBelongToConversationGuard implements CanActivate {
     private readonly logger = new Logger(WsIsMeassageBelongToConversationGuard.name);
 
     constructor(
-        @Inject() private readonly dmsMessagesService: DmsMessagesService
+        @Inject() private readonly dmsMessagesService: MessagesService
     ) { }
 
     async canActivate(

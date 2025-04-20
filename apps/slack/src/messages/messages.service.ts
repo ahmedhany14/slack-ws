@@ -5,8 +5,8 @@ import { Repository } from 'typeorm';
 import { DirectConversationMessages } from '@app/database';
 
 @Injectable()
-export class DmsMessagesService extends AbstractRepoService<DirectConversationMessages> {
-    protected readonly logger: Logger = new Logger(DmsMessagesService.name);
+export class MessagesService extends AbstractRepoService<DirectConversationMessages> {
+    protected readonly logger: Logger = new Logger(MessagesService.name);
     constructor(
         @InjectRepository(DirectConversationMessages)
         private readonly directConversationMessagesRepository: Repository<DirectConversationMessages>,

@@ -18,6 +18,7 @@ export class WsDmsAdapter extends IoAdapter {
             transports: ['websocket', 'polling'],
         };
         const server: Server = super.createIOServer(port, Options);
+
         server.of('/dms').use((socket: Socket, next) => {
             this.logger.log('Socket connected to /dms namespace');
             return next();

@@ -1,5 +1,5 @@
 import { IsExistUser } from "@app/validators";
-import { IsNotEmpty, IsOptional, IsPositive, IsString, MaxLength } from "class-validator";
+import { IsNotEmpty, IsPositive, IsString, MaxLength } from "class-validator";
 
 
 export class SendDmMessageDto {

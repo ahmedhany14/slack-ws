@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext, Inject, Injectable, Logger } from '@nestjs/common';
-import { DmsService } from '../services/dms.service';
+import { DmsService } from '../../dms/dms.service';
 import { SocketI } from '../../interfaces/socket.client.interface';
-import { MarkMessageAsReadDto } from '../dtos/mark.message.as-read.dto';
+import { MarkMessageAsReadDto } from '../../messages/dtos/mark.message.as-read.dto';
 import { WsException } from '@nestjs/websockets';
 
 @Injectable()

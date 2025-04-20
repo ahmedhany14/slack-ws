@@ -1,5 +1,5 @@
 import { CanActivate, ExecutionContext, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { DmsService } from '../services/dms.service';
+import { DmsService } from '../../dms/dms.service';
 import { RequestI } from '@app/interfaces';
 
 @Injectable()
