@@ -59,7 +59,7 @@ export class DmsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     constructor(
         @Inject() private readonly dmsService: DmsService,
         @Inject() private readonly wsAuthenticateUserService: WsAuthenticateUserService,
-    ) {}
+    ) { }
 
     async handleConnection(client: SocketI) {
         try {
@@ -85,7 +85,7 @@ export class DmsGateway implements OnGatewayConnection, OnGatewayDisconnect {
             await this.emitConversations(client);
         } catch (error) {
             this.logger.log('Connection error');
-            client.emit('error', {
+            client.emit('ws_error', {
                 message:
                     error instanceof WsException
                         ? error.getError().toString()

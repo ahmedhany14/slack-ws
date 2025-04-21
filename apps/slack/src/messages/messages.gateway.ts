@@ -70,7 +70,7 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
         @Inject() private readonly dmsService: DmsService,
         @Inject() private readonly dmsMessagesService: MessagesService,
         @Inject() private readonly wsAuthenticateUserService: WsAuthenticateUserService,
-    ) {}
+    ) { }
 
     async handleConnection(client: SocketI) {
         try {
@@ -94,7 +94,7 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
             await this.emitUnreadMessages(client);
         } catch (error) {
             console.log('Connection error', error);
-            client.emit('error', {
+            client.emit('ws_error', {
                 message: 'Unexpected error occurred',
             });
             client.disconnect();

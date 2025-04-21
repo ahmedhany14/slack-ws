@@ -85,7 +85,7 @@ export class FriendsGateway implements OnGatewayConnection, OnGatewayDisconnect 
 
         } catch (error) {
             this.logger.log('Connection error');
-            client.emit('error', {
+            client.emit('ws_error', {
                 message:
                     error instanceof WsException
                         ? error.getError().toString()
