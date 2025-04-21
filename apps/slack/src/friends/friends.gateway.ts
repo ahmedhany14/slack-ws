@@ -167,7 +167,15 @@ export class FriendsGateway implements OnGatewayConnection, OnGatewayDisconnect 
                 friend_request: accepted_request,
             })
 
-        // TODO: emait to the receiver that the request was accepted, and request data to make client add it to friend list 
+        // OK: emit to the sender that the request was accepted, and request data to make client remove it from pending list and add the friend to the list
+        // emit to the user that he accepted the request
+        this.server
+            .to(`user:friends:request:ws:${receiver_id}`) // send to the receiver
+            .emit('friend:request:accepted', {
+                message: `You accepted the friend request from ${accepted_request?.receiver?.username}`,
+                friend_request: accepted_request,
+            });
+
     }
 
 
@@ -191,14 +199,30 @@ export class FriendsGateway implements OnGatewayConnection, OnGatewayDisconnect 
             request_status: RequestStatus.REJECTED
         });
 
+        const reject_request = await this.friendsService.findOne({
+            sender: { id: sender_id },
+            receiver: { id: receiver_id },
+            request_status: RequestStatus.REJECTED
+        } as FriendsInvitations);
+
         // emit to the user that he rejected the request
         this.server
             .to(`user:friends:request:ws:${receiver_id}`)
             .emit('friend:request:rejected', {
                 message: `you rejected the friend request from ${client.data.user?.username}`,
+                reject_request,
             })
 
-        // TODO: emit to the sender that the request was rejected, and request data to make client remove it from pending list
+        // OK: emit to the sender that the request was rejected, and request data to make client remove it from pending list
+        // emit to the sender that the request was rejected
+
+        this.server
+            .to(`user:friends:request:ws:${sender_id}`) // send to the sender
+            .emit('friend:request:rejected', {
+                message: `Your friend request was rejected by ${client.data.user?.username}`,
+                reject_request,
+            });
+
     }
 
     // will be canceled and removed from both sides but without message to the sender
@@ -221,13 +245,27 @@ export class FriendsGateway implements OnGatewayConnection, OnGatewayDisconnect 
             request_status: RequestStatus.CANCELED
         });
 
+        const canceled_request = await this.friendsService.findOne({
+            sender: { id: sender_id },
+            receiver: { id: receiver_id },
+            request_status: RequestStatus.CANCELED
+        } as FriendsInvitations);
+
         // emit to the user that he canceled the request
         this.server
             .to(`user:friends:request:ws:${sender_id}`)
             .emit('friend:request:canceled', {
                 message: `You canceled the friend request you sent`
             })
-        // TODO: emit to the receiver that the request was canceled, and request data to make client remove it from pending list
+        // OK: emit to the receiver that the request was canceled, and request data to make client remove it from pending list
+
+        // emit to the receiver that request canceled
+        this.server
+            .to(`user:friends:request:ws:${receiver_id}`) // send to the receiver
+            .emit('friend:request:canceled', {
+                message: `Your friend request was canceled by ${canceled_request?.sender.username}`,
+                canceled_request
+            });
     }
 
     // will remove the friend also from both sides
