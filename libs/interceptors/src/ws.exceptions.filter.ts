@@ -24,8 +24,6 @@ export class WsExceptionsFilter implements WsExceptionFilter {
         };
 
         // Emit error to a client
-        client.emit('error', errorResponse);
-
-        client.disconnect();
+        client.emit('ws_error', errorResponse);
     }
 }

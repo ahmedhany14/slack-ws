@@ -7,7 +7,9 @@ export enum RequestStatus {
     PENDING = 'pending',
     ACCEPTED = 'accepted',
     REJECTED = 'rejected',
-    REMOVED = 'removed'
+    CANCELED = 'canceled',
+    REMOVED = 'removed',
+    BLOCKED = 'blocked'
 }
 
 /**

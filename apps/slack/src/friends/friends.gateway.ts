@@ -14,7 +14,7 @@ import { Server, Socket } from 'socket.io';
 // interfaces and dtos
 import { IWsAuthenticateRequest } from '@app/auth.common';
 import { SocketI } from '../interfaces/socket.client.interface';
-import { AcceptFriendRequestDto, SendFriendRequestDto, RejectFriendRequestDto } from './dtos/friend.reques.id.validators.dto';
+import { AcceptFriendRequestDto, SendFriendRequestDto, RejectFriendRequestDto, CancelFriendRequestDto } from './dtos/friend.reques.id.validators.dto';
 import { FriendsInvitations, RequestStatus } from '@app/database';
 
 // filters
@@ -28,6 +28,7 @@ import { WsAuthenticateUserService } from '../common/ws.authenticate.user.servic
 import { WsAuthGuard } from '../guards/ws.auth.guard';
 import { CanYouSendFriendRequestGuard } from './guards/can.you.send.friend.request.guard';
 import { CanYouAcceptOrRejectFriendRequestGuard } from './guards/can.you.accept.or.reject.friend.request.guard';
+import { CanYouCancelFriendRequestGuard } from './guards/can.you.cancel.friend.request.guard';
 
 @UseFilters(new WsExceptionsFilter())
 @UsePipes(
@@ -165,6 +166,8 @@ export class FriendsGateway implements OnGatewayConnection, OnGatewayDisconnect 
                 message: `Your friend request was accepted by ${client.data.user?.username}`,
                 friend_request: accepted_request,
             })
+
+        // TODO: emait to the receiver that the request was accepted, and request data to make client add it to friend list 
     }
 
 
@@ -178,10 +181,9 @@ export class FriendsGateway implements OnGatewayConnection, OnGatewayDisconnect 
     ) {
         const sender_id = rejectFriendRequestDto.sender_id,
             receiver_id = client.data.user?.id as number;
-
         this.logger.log(`rejecting friend request from ${client.data.user?.id} to ${rejectFriendRequestDto.sender_id}`);
 
-        const rejected_request = await this.friendsService.findOneAndUpdate({
+        await this.friendsService.findOneAndUpdate({
             sender: { id: sender_id },
             receiver: { id: receiver_id },
             request_status: RequestStatus.PENDING
@@ -189,20 +191,44 @@ export class FriendsGateway implements OnGatewayConnection, OnGatewayDisconnect 
             request_status: RequestStatus.REJECTED
         });
 
+        // emit to the user that he rejected the request
         this.server
             .to(`user:friends:request:ws:${receiver_id}`)
             .emit('friend:request:rejected', {
                 message: `you rejected the friend request from ${client.data.user?.username}`,
-                friend_request: rejected_request,
             })
 
+        // TODO: emit to the sender that the request was rejected, and request data to make client remove it from pending list
     }
 
     // will be canceled and removed from both sides but without message to the sender
     // will be done by the request sender
+    @UseGuards(WsAuthGuard, CanYouCancelFriendRequestGuard)
     @SubscribeMessage('friend:cancel:request')
-    async cancelFriendInvitation() { }
+    async cancelFriendInvitation(
+        @ConnectedSocket() client: SocketI,
+        @MessageBody() cancelFriendRequestDto: CancelFriendRequestDto,
+    ) {
+        const sender_id = client.data.user?.id as number,
+            receiver_id = cancelFriendRequestDto.receiver_id;
+        this.logger.log(`canceling friend request from ${client.data.user?.id} to ${cancelFriendRequestDto.receiver_id}`);
 
+        await this.friendsService.findOneAndUpdate({
+            sender: { id: sender_id },
+            receiver: { id: receiver_id },
+            request_status: RequestStatus.PENDING
+        }, {
+            request_status: RequestStatus.CANCELED
+        });
+
+        // emit to the user that he canceled the request
+        this.server
+            .to(`user:friends:request:ws:${sender_id}`)
+            .emit('friend:request:canceled', {
+                message: `You canceled the friend request you sent`
+            })
+        // TODO: emit to the receiver that the request was canceled, and request data to make client remove it from pending list
+    }
 
     // will remove the friend also from both sides
     // both sender and receiver can do this
