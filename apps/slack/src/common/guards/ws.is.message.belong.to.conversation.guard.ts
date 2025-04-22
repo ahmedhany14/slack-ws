@@ -4,6 +4,7 @@ import { SocketI } from '../../interfaces/socket.client.interface';
 import { MarkMessageAsReadDto } from '../../messages/dtos/mark.message.as-read.dto';
 import { MessagesService } from '../../messages/messages.service';
 import { DirectConversation } from '@app/database';
+import { WsException } from '@nestjs/websockets';
 
 
 export class WsIsMessageBelongToConversationGuard implements CanActivate {
@@ -30,7 +31,7 @@ export class WsIsMessageBelongToConversationGuard implements CanActivate {
         });
 
         if (!message || message.creator.id === reader_id)
-            throw new ConflictException(`Message with id ${data.message_id} does not exist or you are the creator of this message`);
+            throw new WsException(`Message with id ${data.message_id} does not exist or you are the creator of this message`);
 
         client.data.message = message;
         return true;

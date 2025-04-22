@@ -8,6 +8,7 @@ export interface SocketI extends Socket {
         user?: {
             id: number;
             username: string;
+            anyone_dm: boolean;
         };
         conversation?: DirectConversation
         message?: DirectConversationMessages

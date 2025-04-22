@@ -1,6 +1,7 @@
 import { CanActivate, ExecutionContext, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { DmsService } from '../../dms/dms.service';
 import { RequestI } from '@app/interfaces';
+import { WsException } from '@nestjs/websockets';
 
 @Injectable()
 export class IsYourConversationGuard implements CanActivate {
@@ -26,7 +27,7 @@ export class IsYourConversationGuard implements CanActivate {
         });
 
         if (!conversation) {
-            throw new UnauthorizedException({
+            throw new WsException({
                 message: "You are not authorized to access this conversation or it does not exist"
             })
         }

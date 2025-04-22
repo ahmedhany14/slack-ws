@@ -22,8 +22,9 @@ import { FetchConversationMessagesDto } from './dtos/fetch.conversation.messages
 import { DirectConversation, DirectConversationMessages } from '@app/database';
 
 // guards
-import { WsIsYourConversationGuard } from '../common/guards/ws.is.your.conversation.guard';
 import { WsIsMessageBelongToConversationGuard } from '../common/guards/ws.is.message.belong.to.conversation.guard';
+import { WsIsYourConversationGuard } from '../common/guards/ws.is.your.conversation.guard';
+import { AllowToMessageHimGuard } from './guards/allow.to.message.him.guard';
 import { WsAuthGuard } from '../guards/ws.auth.guard';
 
 // decorators
@@ -87,8 +88,8 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
             client.join(`user:messages:${client.data.user.id}`);
 
             /*
-             // OK: emit all unread and mark them as read for the sender
-             Some explanations:
+            // OK: emit all unread and mark them as read for the sender
+            Some explanations:
              * any unread message can be delivered and undelivered
              * so instead of sending unread and undelivered messages, we can send all unread messages
              * this will guarantee that the sender will receive all unread and undelivered messages
@@ -156,7 +157,7 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
      * @param conversation_initiator
      * @emits receive:direct-message
      */
-    @UseGuards(WsAuthGuard)
+    @UseGuards(WsAuthGuard, AllowToMessageHimGuard)
     @SubscribeMessage('send:direct-message')
     async sendMessage(
         @MessageBody() sendDmMessageDto: SendDmMessageDto,

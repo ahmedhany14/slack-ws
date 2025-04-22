@@ -10,6 +10,7 @@ import { IWsAuthenticateRequest } from '@app/auth.common';
 interface AuthenticatedUser {
     id: number;
     username: string;
+    anyone_dm: boolean;
 }
 
 @Injectable()
@@ -18,7 +19,7 @@ export class WsAuthenticateUserService {
 
     constructor(
         @Inject(AUTH_SERVICE) private readonly authClient: ClientProxy
-    ) {}
+    ) { }
 
     /**
      * Authenticates a user based on the provided request
@@ -75,6 +76,7 @@ export class WsAuthenticateUserService {
         return {
             id: response.id,
             username: response.username,
+            anyone_dm: response.anyone_dm,
         };
     }
 
