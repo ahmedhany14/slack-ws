@@ -23,6 +23,13 @@ export class Account extends AbstractEntity<Account> {
     })
     password: string;
 
+    @Column({
+        type: 'boolean',
+        default: true,
+        nullable: false,
+    })
+    anyone_dm: boolean;
+
     @OneToMany(() => Server, (server) => server.owner, {
         lazy: true,
     })
