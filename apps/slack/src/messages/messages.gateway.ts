@@ -147,15 +147,14 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
         this.logger.log(`Client disconnected: ${client.id}`);
     }
 
-    // TODO: Authorize that recipient allows messages from the senders how are not in the friend list
     /**
      * ws event to send a direct message to a user
-     * Also, this event will be used to create a new conversation if the conversation does not exist
-     * Authenticated users can send messages to each other
-     * Friendship is required to send messages TODO:
-     * @param sendDmMessageDto
-     * @param conversation_initiator
-     * @emits receive:direct-message
+     * 
+     * This event will be used to send a direct message to a user
+     * 
+     * @param sendDmMessageDto dto for sending a direct message
+     * @param conversation_initiator the user who initiates the conversation
+     * @emits receive:direct-message to the recipient
      */
     @UseGuards(WsAuthGuard, AllowToMessageHimGuard)
     @SubscribeMessage('send:direct-message')
