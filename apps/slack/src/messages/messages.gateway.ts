@@ -9,13 +9,17 @@ import {
     WsException,
 } from '@nestjs/websockets';
 import { Inject, Logger, UseFilters, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Server } from 'socket.io';
+
 // interfaces and dtos
 import { IWsAuthenticateRequest } from '@app/auth.common';
 import { SocketI } from '../interfaces/socket.client.interface';
 import { SendDmMessageDto } from './dtos/send.dm.message.dto';
+import { MarkMessageAsDeliveredDto, MarkMessageAsReadDto } from './dtos/mark.message.as-read.dto';
+import { FetchConversationMessagesDto } from './dtos/fetch.conversation.messages.dto';
 
 // entities
-import { DirectConversationMessages } from '@app/database';
+import { DirectConversation, DirectConversationMessages } from '@app/database';
 
 // guards
 import { WsIsYourConversationGuard } from '../common/guards/ws.is.your.conversation.guard';
@@ -23,7 +27,7 @@ import { WsIsMessageBelongToConversationGuard } from '../common/guards/ws.is.mes
 import { WsAuthGuard } from '../guards/ws.auth.guard';
 
 // decorators
-import { WsExtractUserData } from '@app/decorators';
+import { ExtractConversationData, WsExtractUserData } from '@app/decorators';
 
 // services
 import { MessagesService } from './messages.service';
@@ -32,8 +36,6 @@ import { DmsService } from '../dms/dms.service';
 
 // filters
 import { WsExceptionsFilter } from '@app/interceptors';
-import { Server } from 'socket.io';
-import { MarkMessageAsDeliveredDto, MarkMessageAsReadDto } from './dtos/mark.message.as-read.dto';
 
 @UseFilters(new WsExceptionsFilter())
 @UsePipes(
@@ -105,11 +107,11 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
 
     private async emitUnreadMessages(client: SocketI) {
         /*
-         Logic:
-         1) we will fetch all unread messages for user
-         2) mark any undelivered messages as delivered
-         3) emit to the sender of the message that messages are delivered
-         4) emit the unread messages to the user
+            Logic:
+            1) we will fetch all unread messages for user
+            2) mark any undelivered messages as delivered
+            3) emit to the sender of the message that messages are delivered
+            4) emit the unread messages to the user
          */
 
         // fetch all unread messages for user
@@ -172,7 +174,7 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
 
         // FIXME: here is and concurrency issue in last_message
         /*
-         while last_messages get updated in the conversation with conversation id, the foreign key conversation in a new message still has the oldest content
+            while last_messages get updated in the conversation with conversation id, the foreign key conversation in a new message still has the oldest content
          */
         const message = await this.dmsMessagesService.create({
             content: sendDmMessageDto.content,
@@ -261,12 +263,34 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
         });
     }
 
-    // TODO: Fetch Conversation Messages by page (pagination)
+
+    // TODO: Test the event
     /**
      * an event to fetch all messages for a conversation
+     * 
      * This event will be used to fetch all messages for a conversation
-     * Authenticated users can fetch their conversations
-     * @param client
-     * @emits conversation:messages
+     * 
+     * @param client Socket client
+     * @param _fetchConversationMessagesDto DTO for fetching conversation messages
      */
+    @SubscribeMessage('fetch:conversation-messages')
+    @UseGuards(WsAuthGuard, WsIsYourConversationGuard)
+    async fetchConversationMessages(
+        @ConnectedSocket() client: SocketI,
+        @MessageBody() _fetchConversationMessagesDto: FetchConversationMessagesDto,
+        @ExtractConversationData() conversation: DirectConversation,
+    ) {
+        this.logger.log(`User is requesting messages for conversation ${client.data.conversation?.id}`);
+
+        const messages = await this.dmsMessagesService.findConversationMessages(conversation, _fetchConversationMessagesDto.page);
+
+        this.server
+            .to(`user:messages:${client.data.user?.id}`)
+            .emit('fetch:conversation-messages', {
+                conversation_id: conversation.id,
+                messages: messages.response,
+                meta: messages.meta
+            });
+    }
+
 }
