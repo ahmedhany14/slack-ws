@@ -1,18 +1,21 @@
-import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
+import { forwardRef, MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { DatabaseModule, Server } from '@app/database';
+import { DatabaseModule, Server, Subscribers } from '@app/database';
 import { ConfigModule, ConfigService } from '@app/config';
 import { AUTH_SERVICE } from '@app/constants';
 
-import { ServerService } from './server.service';
+import { ServerService } from './services/server.service';
 import { ServerController } from './server.controller';
-import { IsExistConversationValidator } from '@app/validators';
+import { ServersGateway } from './servers.gateway';
+import { SlackModule } from '../slack.module';
+import { SubscribersService } from './services/subscribers.service';
 
 @Module({
     imports: [
         DatabaseModule,
-        TypeOrmModule.forFeature([Server]),
+        forwardRef(() => SlackModule),
+        TypeOrmModule.forFeature([Server, Subscribers]),
         ClientsModule.registerAsync([
             // auth service
             {
@@ -28,10 +31,10 @@ import { IsExistConversationValidator } from '@app/validators';
                 }),
             },
 
-        ], ),
+        ],),
     ],
     controllers: [ServerController],
-    providers: [ServerService],
+    providers: [ServerService, ServersGateway, SubscribersService],
     exports: [ServerService],
 })
-export class ServerModule {}
+export class ServerModule { }

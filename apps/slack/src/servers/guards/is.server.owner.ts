@@ -7,13 +7,13 @@ import {
     UnauthorizedException,
 } from '@nestjs/common';
 import { RequestI } from '@app/interfaces';
-import { ServerService } from '../server.service';
+import { ServerService } from '../services/server.service';
 
 @Injectable()
 export class IsServerOwner implements CanActivate {
     private readonly logger: Logger = new Logger(IsServerOwner.name);
 
-    constructor(@Inject() private readonly serverService: ServerService) {}
+    constructor(@Inject() private readonly serverService: ServerService) { }
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         this.logger.log('Checking if user is allowed to update server');

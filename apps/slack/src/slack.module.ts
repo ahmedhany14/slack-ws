@@ -3,7 +3,6 @@ import { Module } from '@nestjs/common';
 // modules
 import { ServerModule } from './servers/server.module';
 import { NamespacesModule } from './namespaces/namespaces.module';
-import { SubscribersModule } from './subscribers/subscribers.module';
 import { DatabaseModule } from '@app/database';
 import { FriendsModule } from './friends/friends.module';
 import { DmsModule } from './dms/dms.module';
@@ -33,7 +32,6 @@ import { MessagesModule } from './messages/messages.module';
         FriendsModule,
         ServerModule,
         NamespacesModule,
-        SubscribersModule,
         DatabaseModule,
         DmsModule,
         ClientsModule.registerAsync([

@@ -13,21 +13,25 @@ import {
 // libraries
 import { AuthGuard } from '@app/auth.common';
 import { ExtractUserData } from '@app/decorators';
-import { Server } from '@app/database';
+import { Server, subscriberRole, Subscribers } from '@app/database';
 
 // service
-import { ServerService } from './server.service';
+import { ServerService } from './services/server.service';
 
 // dto
 import { CreateServerDto } from './dtos/create.server.dto';
 import { UpdateServerDto } from './dtos/update.server.dto';
 import { IsServerOwner } from './guards/is.server.owner';
+import { SubscribersService } from './services/subscribers.service';
 
 @Controller('server')
 export class ServerController {
     private readonly logger: Logger = new Logger(ServerController.name);
 
-    constructor(@Inject() private readonly serverService: ServerService) {}
+    constructor(
+        @Inject() private readonly serverService: ServerService,
+        @Inject() private readonly subscribersService: SubscribersService,
+    ) { }
 
     /**
      * Creates a new server using the provided data and user id.
@@ -44,6 +48,7 @@ export class ServerController {
     ): Promise<{
         response: {
             server: Server;
+            owner_subscribe: Subscribers;
         };
     }> {
         this.logger.log(`creating server, id: ${id}`);
@@ -54,9 +59,16 @@ export class ServerController {
             owner: { id },
         } as Server);
 
+        const owner_subscribe = await this.subscribersService.create({
+            server: { id: server.id },
+            subscriber: { id },
+            role: subscriberRole.OWNER
+        } as Subscribers)
+
         return {
             response: {
                 server,
+                owner_subscribe
             },
         };
     }

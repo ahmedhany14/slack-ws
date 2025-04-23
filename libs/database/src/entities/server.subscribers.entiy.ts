@@ -4,7 +4,7 @@ import { Server } from './server.entity';
 import { Account } from './account.entity';
 
 
-enum subscriberRole {
+export enum subscriberRole {
     OWNER = 'owner',
     ADMIN = 'admin',
     MEMBER = 'member',
