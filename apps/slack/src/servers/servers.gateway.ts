@@ -10,6 +10,7 @@ import {
 } from '@nestjs/websockets';
 import { Inject, Logger, UseFilters, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { Server } from 'socket.io';
+import { Account, Server as _Server, Subscribers, subscriberRole } from '@app/database';
 
 // interfaces and dtos
 import { IWsAuthenticateRequest } from '@app/auth.common';
@@ -26,12 +27,16 @@ import { WsExtractUserData } from '@app/decorators';
 
 // filters
 import { WsExceptionsFilter } from '@app/interceptors';
-import { Account, Namespaces, Server as _Server, Subscribers, subscriberRole } from '@app/database';
+
+// decorators
 import { CreateServerDto } from './dtos/create.server.dto';
-import { WsAuthGuard } from '../guards/ws.auth.guard';
 import { UpdateServerDto } from './dtos/update.server.dto';
-import { IsServerOwner } from './guards/is.server.owner';
+import { SendServerInvitationDto } from './dtos/send.server.invitation.dto';
+
+// guards
+import { WsAuthGuard } from '../guards/ws.auth.guard';
 import { WsIsServerOwner } from './guards/ws.is.server.owner.guard';
+import { IsAllowedToInviteGuard } from './guards/is.allowed.to.invite.guard';
 
 
 interface serversI {
@@ -86,6 +91,7 @@ export class ServersGateway implements OnGatewayConnection, OnGatewayDisconnect 
 
             // OK: joining user to listening events
             client.join(`user:servers:${client.data.user.id}`);
+            client.join(`user:servers:invitations:${client.data.user.id}`);
 
             // OK: emit server list to the client
             const servers: serversI[] = await this.handleServerJoin(client);
@@ -228,6 +234,46 @@ export class ServersGateway implements OnGatewayConnection, OnGatewayDisconnect 
         require valid server id
         require valid user id
     */
+    @UseGuards(WsAuthGuard, IsAllowedToInviteGuard)
+    @SubscribeMessage('server:users:invite')
+    async handleServerUsersInvite(
+
+        @WsExtractUserData() user: Account,
+        @MessageBody() sendServerInvitationDto: SendServerInvitationDto
+    ) {
+        this.logger.log(`user ${user.id} invited user ${sendServerInvitationDto.receiver_id} to server ${sendServerInvitationDto.server_id}`);
+
+        const server = await this.serverService.findOne({ id: sendServerInvitationDto.server_id });
+
+        const invitation = await this.subscribersService.create({
+            server: { id: sendServerInvitationDto.server_id },
+            subscriber: { id: sendServerInvitationDto.receiver_id },
+            role: subscriberRole.PENDING,
+        } as Subscribers);
+
+        // TODO: change to event emitter in the future 
+        this.server
+            .to(`user:servers:invitations:${sendServerInvitationDto.receiver_id}`).
+            emit('server:users:invited', {
+                message: `user ${user.username} invited you to join server ${server?.name}`,
+                invitation: {
+                    server: {
+                        id: server?.id,
+                        name: server?.name,
+                        description: server?.description,
+                    },
+                    invited_by: {
+                        id: user.id,
+                        name: user.username,
+                    },
+                }
+            });
+
+        // TODO: emit on the server general that user invited to the server
+    }
+
+    // TODO: add server users accept or reject event
+
 
     // TODO: add server users kick event
     /*
