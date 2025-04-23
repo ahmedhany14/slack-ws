@@ -26,7 +26,12 @@ import { WsExtractUserData } from '@app/decorators';
 
 // filters
 import { WsExceptionsFilter } from '@app/interceptors';
-import { Account, Namespaces } from '@app/database';
+import { Account, Namespaces, Server as _Server, Subscribers, subscriberRole } from '@app/database';
+import { CreateServerDto } from './dtos/create.server.dto';
+import { WsAuthGuard } from '../guards/ws.auth.guard';
+import { UpdateServerDto } from './dtos/update.server.dto';
+import { IsServerOwner } from './guards/is.server.owner';
+import { WsIsServerOwner } from './guards/ws.is.server.owner.guard';
 
 
 interface serversI {
@@ -150,10 +155,72 @@ export class ServersGateway implements OnGatewayConnection, OnGatewayDisconnect 
         this.logger.log(`Client disconnected: ${client.id}`);
     }
 
-    // TODO: add server create event
-    /*
-        Just require authenticated user
-    */
+    /**
+     * Handles the creation of a new server.
+     * 
+     * This method is triggered when a client emits the 'create:new:server' event.
+     * 
+     * @param user user data extracted from the socket connection
+     * @param createServerDto server data to be created
+     * @returns server data, created by the user
+     */
+    @UseGuards(WsAuthGuard)
+    @SubscribeMessage('create:new:server')
+    async handleCreateServer(
+        @WsExtractUserData() user: Account,
+        @MessageBody() createServerDto: CreateServerDto
+    ) {
+        this.logger.log(`user ${user.id} created new server`);
+        const server = await this.serverService.create({
+            ...createServerDto,
+            owner: { id: user.id },
+        } as _Server);
+        const owner_subscriber = await this.subscribersService.create({
+            server: { id: server.id },
+            subscriber: { id: user.id },
+            role: subscriberRole.OWNER,
+        } as Subscribers);
+        this.logger.log(`user ${user.id} created new server with id ${server.id}`);
+
+        this.server
+            .to(`user:servers:${user.id}`).emit('server:created', {
+                message: 'server created',
+                server,
+                owner: owner_subscriber
+            });
+    }
+
+
+    /**
+     * Handles the update of an existing server.
+     * 
+     * This method is triggered when a client emits the 'server:update' event.
+     * 
+     * @param user user data extracted from the socket connection
+     * @param updateServerDto server data to be updated
+     * @returns updated server data
+     */
+    @UseGuards(WsAuthGuard, WsIsServerOwner)
+    @SubscribeMessage('server:update')
+    async handleUpdateServer(
+        @WsExtractUserData() user: Account,
+        @MessageBody() updateServerDto: UpdateServerDto
+    ) {
+        this.logger.log(`user ${user.id} updated server with id ${updateServerDto.server_id}`);
+        const { server_id, ...updateData } = updateServerDto;
+        const server = await this.serverService.findOneAndUpdate(
+            { id: updateServerDto.server_id },
+            updateData
+        );
+        this.server
+            .to(`user:servers:${user.id}`).emit('server:updated', {
+                message: 'server updated',
+                server
+            });
+
+        // TODO: emit on the general that server data updated and by how ...
+    }
+
 
     // TODO: add server users invite event
     /*

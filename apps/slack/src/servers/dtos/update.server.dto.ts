@@ -9,8 +9,4 @@ export class UpdateServerDto extends PartialType(CreateServerDto) {
     @IsNumber()
     @IsExistServer()
     server_id: number
-
-    @IsBoolean()
-    @IsOptional()
-    visibility?: boolean;
 }

@@ -1,4 +1,5 @@
 import {
+    IsBoolean,
     IsNotEmpty,
     IsString,
     MaxLength,
@@ -18,4 +19,8 @@ export class CreateServerDto {
     @MinLength(1)
     @MaxLength(255)
     description: string
+
+    @IsNotEmpty()
+    @IsBoolean()
+    visable: boolean
 }
