@@ -161,6 +161,43 @@ export class ServersGateway implements OnGatewayConnection, OnGatewayDisconnect 
         this.logger.log(`Client disconnected: ${client.id}`);
     }
 
+
+    /**
+     * Handles the request for the server list.
+     * 
+     * This method is triggered when a client emits the 'server:list' event.
+     * 
+     * @param client socket client who requested the server list
+     * @returns the list of servers the user is subscribed to 
+     */
+    @UseGuards(WsAuthGuard)
+    @SubscribeMessage('server:list')
+    async handleServerList(
+        @ConnectedSocket() client: SocketI,
+    ) {
+        this.logger.log(`Emitted servers to ${client.data.user?.id}`);
+        const my_servers = await this.subscribersService.find({
+            subscriber: { id: client.data.user?.id },
+        });
+
+        const servers_data = my_servers.map((server) => ({
+            id: server.server.id,
+            name: server.server.name,
+            description: server.server.description,
+            owner: server.server.owner,
+            visible: server.server.visable,
+        }))
+
+        this.server
+            .to(`user:servers:${client.data.user?.id}`)
+            .emit('servers:list', {
+                message: "user servers list",
+                servers: servers_data
+            });
+    }
+
+    // TODO: add server members list event
+
     /**
      * Handles the creation of a new server.
      * 
