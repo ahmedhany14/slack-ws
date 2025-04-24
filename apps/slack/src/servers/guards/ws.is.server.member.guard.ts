@@ -34,7 +34,7 @@ export class IsServerMemberGuard implements CanActivate {
             subscriber: { id: client.data.user?.id },
         });
 
-        if (!subscriber || subscriber.role! in [subscriberRole.ADMIN, subscriberRole.MEMBER, subscriberRole.OWNER]) {
+        if (!subscriber || ![subscriberRole.ADMIN, subscriberRole.MEMBER, subscriberRole.OWNER].includes(subscriber.role)) {
             this.logger.log('User is not a member of the server');
             throw new WsException('You are not a member of this server');
         }

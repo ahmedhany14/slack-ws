@@ -39,6 +39,7 @@ import { WsAuthGuard } from '../guards/ws.auth.guard';
 import { WsIsServerOwner } from './guards/ws.is.server.owner.guard';
 import { IsAllowedToInviteGuard } from './guards/is.allowed.to.invite.guard';
 import { IsServerMemberGuard } from './guards/ws.is.server.member.guard';
+import { WsIsServerAdminGuard } from './guards/ws.is.server.admin.guard';
 
 
 interface serversI {
@@ -198,7 +199,6 @@ export class ServersGateway implements OnGatewayConnection, OnGatewayDisconnect 
             });
     }
 
-    // TODO: add server members list event
     /**
      * Handles the request for the server members list.
      * 
@@ -219,13 +219,17 @@ export class ServersGateway implements OnGatewayConnection, OnGatewayDisconnect 
             server: { id: serverMembersListDto.server_id },
         });
 
+        const filterd_members = members.filter((member) => {
+            return [subscriberRole.ADMIN, subscriberRole.MEMBER, subscriberRole.OWNER].includes(member.role)
+        });
+
         this.server
             .to(`user:servers:${client.data.user?.id}`)
             .emit('server:members:list', {
                 message: "server members list",
                 server_id: serverMembersListDto.server_id,
-                server_name: members[0].server.name,
-                members: members.map((member) => {
+                server_name: filterd_members[0].server.name,
+                members: filterd_members.map((member) => {
                     return {
                         id: member.subscriber.id,
                         name: member.subscriber.username,
@@ -347,16 +351,54 @@ export class ServersGateway implements OnGatewayConnection, OnGatewayDisconnect 
         // TODO: emit on the server general that user invited to the server
     }
 
-    // TODO: add server users accept or reject event
 
 
-    // TODO: add server users kick event
-    /*
-        require authenticated user
-        require valid server id
-        require valid user id
-        require user is server owner
-    */
+    /**
+     * Handles the kick of a user from a server.
+     * 
+     * This method is triggered when a client emits the 'server:users:kick' event.
+     * 
+     * @param client socket client who requested the server members list
+     * @param kickUserDto user id to be kicked and server id
+     * 
+     */
+    @UseGuards(WsAuthGuard, WsIsServerAdminGuard)
+    @SubscribeMessage('server:users:kick')
+    async handelServerUsersKick(
+        @ConnectedSocket() client: SocketI,
+        @MessageBody() kickUserDto: { server_id: number, user_id: number }
+    ) {
+        const admin = client.data.user;
+        this.logger.log(`user ${admin?.id} kicked user ${admin?.id} from server ${admin?.id}`);
+
+        if (admin?.id === kickUserDto.user_id) throw new WsException("you can't kick yourself");
+
+        const user_subscriber = await this.subscribersService.findOne({
+            server: { id: kickUserDto.server_id },
+            subscriber: { id: kickUserDto.user_id },
+        })
+        const admin_subscriber = await this.subscribersService.findOne({
+            server: { id: kickUserDto.server_id },
+            subscriber: { id: admin?.id },
+        })
+
+
+        if (!user_subscriber) throw new WsException("user is not a member of the server");
+        if (user_subscriber.role === subscriberRole.OWNER) throw new WsException("you can't kick the server owner");
+        if (user_subscriber.role == subscriberRole.ADMIN && admin_subscriber?.role !== subscriberRole.OWNER) throw new WsException("you can't kick the server admin, you are not the server owner");
+
+
+        await this.subscribersService.findOneAndUpdate({
+            server: { id: kickUserDto.server_id },
+            subscriber: { id: kickUserDto.user_id },
+        }, {
+            role: subscriberRole.REMOVED,
+        } as Subscribers);
+
+        // TODO: emit to the user that he removed from server
+        // TODO: emit in the server general that user kicked
+    }
+
 
     // TODO: add server users leave event
     /*
@@ -373,4 +415,7 @@ export class ServersGateway implements OnGatewayConnection, OnGatewayDisconnect 
         require user is server owner or admin
         require user to be changed is server member
     */
+
+
+    // TODO: add server users accept or reject event
 }

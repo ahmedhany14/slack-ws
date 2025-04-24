@@ -14,8 +14,8 @@ import { WsException } from '@nestjs/websockets';
 
 
 @Injectable()
-export class WsIsServerOwner implements CanActivate {
-    private readonly logger: Logger = new Logger(WsIsServerOwner.name);
+export class WsIsServerAdminGuard implements CanActivate {
+    private readonly logger: Logger = new Logger(WsIsServerAdminGuard.name);
 
     constructor(
         @Inject() private readonly subscribersService: SubscribersService,

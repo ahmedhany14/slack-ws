@@ -9,6 +9,7 @@ export enum subscriberRole {
     ADMIN = 'admin',
     MEMBER = 'member',
     PENDING = 'pending',
+    REMOVED = 'removed',
 }
 
 @Entity('subscribers')
