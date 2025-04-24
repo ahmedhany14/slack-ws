@@ -28,15 +28,17 @@ import { WsExtractUserData } from '@app/decorators';
 // filters
 import { WsExceptionsFilter } from '@app/interceptors';
 
-// decorators
+// dtos
 import { CreateServerDto } from './dtos/create.server.dto';
 import { UpdateServerDto } from './dtos/update.server.dto';
 import { SendServerInvitationDto } from './dtos/send.server.invitation.dto';
+import { ServerMembersListDto } from './dtos/server.members.list.dto';
 
 // guards
 import { WsAuthGuard } from '../guards/ws.auth.guard';
 import { WsIsServerOwner } from './guards/ws.is.server.owner.guard';
 import { IsAllowedToInviteGuard } from './guards/is.allowed.to.invite.guard';
+import { IsServerMemberGuard } from './guards/ws.is.server.member.guard';
 
 
 interface serversI {
@@ -197,6 +199,42 @@ export class ServersGateway implements OnGatewayConnection, OnGatewayDisconnect 
     }
 
     // TODO: add server members list event
+    /**
+     * Handles the request for the server members list.
+     * 
+     * This method is triggered when a client emits the 'server:members:list' event.
+     * 
+     * @param client socket client who requested the server members list
+     * @param serverMembersListDto server id to get the members list
+     * @returns the list of members in the server
+     */
+    @UseGuards(WsAuthGuard, IsServerMemberGuard)
+    @SubscribeMessage('server:members:list')
+    async handleServerMembersList(
+        @ConnectedSocket() client: SocketI,
+        @MessageBody() serverMembersListDto: ServerMembersListDto
+    ) {
+        this.logger.log(`user ${client.data.user?.id} requested server members list for server ${serverMembersListDto.server_id}`);
+        const members = await this.subscribersService.find({
+            server: { id: serverMembersListDto.server_id },
+        });
+
+        this.server
+            .to(`user:servers:${client.data.user?.id}`)
+            .emit('server:members:list', {
+                message: "server members list",
+                server_id: serverMembersListDto.server_id,
+                server_name: members[0].server.name,
+                members: members.map((member) => {
+                    return {
+                        id: member.subscriber.id,
+                        name: member.subscriber.username,
+                        role: member.role,
+                        joined_at: member.created_at,
+                    }
+                })
+            });
+    }
 
     /**
      * Handles the creation of a new server.
