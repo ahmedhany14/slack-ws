@@ -40,6 +40,8 @@ import { WsIsServerOwner } from './guards/ws.is.server.owner.guard';
 import { IsAllowedToInviteGuard } from './guards/is.allowed.to.invite.guard';
 import { IsServerMemberGuard } from './guards/ws.is.server.member.guard';
 import { WsIsServerAdminGuard } from './guards/ws.is.server.admin.guard';
+import { KickUserDto } from './dtos/kick.user.dto';
+import { UserRoleChangeDto } from './dtos/user.role.change.dto';
 
 
 interface serversI {
@@ -366,7 +368,7 @@ export class ServersGateway implements OnGatewayConnection, OnGatewayDisconnect 
     @SubscribeMessage('server:users:kick')
     async handelServerUsersKick(
         @ConnectedSocket() client: SocketI,
-        @MessageBody() kickUserDto: { server_id: number, user_id: number }
+        @MessageBody() kickUserDto: KickUserDto
     ) {
         const admin = client.data.user;
         this.logger.log(`user ${admin?.id} kicked user ${admin?.id} from server ${admin?.id}`);
@@ -400,22 +402,70 @@ export class ServersGateway implements OnGatewayConnection, OnGatewayDisconnect 
     }
 
 
-    // TODO: add server users leave event
-    /*
-        require authenticated user
-        require valid server id
-        require user is server member
-    */
-
-    // TODO: add server users role change event
-    /*
-        require authenticated user
-        require valid server id
-        require valid user id
-        require user is server owner or admin
-        require user to be changed is server member
-    */
+    @UseGuards(WsAuthGuard, IsServerMemberGuard)
+    @SubscribeMessage('server:users:leave')
+    async handleServerUsersLeave(
+        @ConnectedSocket() client: SocketI,
+        @MessageBody() userLeaverServerDto: KickUserDto
+    ) {
+        this.logger.log(`user ${client.data.user?.id} left server ${userLeaverServerDto.server_id}`);
 
 
-    // TODO: add server users accept or reject event
+        const user_subscriber = await this.subscribersService.findOne({
+            server: { id: userLeaverServerDto.server_id },
+            subscriber: { id: client.data.user?.id },
+        })
+        if (user_subscriber?.role === subscriberRole.OWNER) throw new WsException("you are the server owner, you can't leave the server");
+
+        await this.subscribersService.findOneAndUpdate({
+            server: { id: userLeaverServerDto.server_id },
+            subscriber: { id: client.data.user?.id },
+        }, {
+            role: subscriberRole.LEAVE,
+        } as Subscribers);
+
+        this.server
+            .to(`user:servers:${client.data.user?.id}`).
+            emit('server:users:left', {
+                message: `user ${client.data.user?.username} left server ${userLeaverServerDto.server_id}`,
+                server_id: userLeaverServerDto.server_id,
+            });
+
+        // TODO: emit in the server general that user left
+    }
+
+
+    @UseGuards(WsAuthGuard, WsIsServerOwner)
+    @SubscribeMessage('server:users:role:change')
+    async handleServerUsersRoleChange(
+        @ConnectedSocket() client: SocketI,
+        @MessageBody() userRoleChangeDto: UserRoleChangeDto
+    ){
+
+        const owner = client.data.user;        
+        this.logger.log(`user ${client.data.user?.id} changed user ${userRoleChangeDto.user_id} role in server ${userRoleChangeDto.server_id}`);
+
+        if( owner?.id === userRoleChangeDto.user_id) throw new WsException("you can't change your own role");
+
+
+        await this.subscribersService.findOneAndUpdate({
+            server: { id: userRoleChangeDto.server_id },
+            subscriber: { id: userRoleChangeDto.user_id },
+        }, {
+            role: userRoleChangeDto.role as string,
+        } as Subscribers);
+
+
+        this.server
+            .to(`user:servers:${client.data.user?.id}`).
+            emit('server:users:role:changed', {
+                message: `user ${client.data.user?.username} changed user ${userRoleChangeDto.user_id} role in server ${userRoleChangeDto.server_id}`,
+                server_id: userRoleChangeDto.server_id,
+                user_id: userRoleChangeDto.user_id,
+                role: userRoleChangeDto.role
+            });
+
+        // TODO: emit in the server general that user role changed
+        // TODO: emit to the user that his role changed
+    }
 }
