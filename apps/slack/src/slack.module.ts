@@ -26,6 +26,7 @@ import {
 // services
 import { WsAuthenticateUserService } from './common/ws.authenticate.user.service';
 import { MessagesModule } from './messages/messages.module';
+import { ServerMessagesModule } from './server-messages/server-messages.module';
 
 @Module({
     imports: [
@@ -50,6 +51,7 @@ import { MessagesModule } from './messages/messages.module';
             },
         ]),
         MessagesModule,
+        ServerMessagesModule,
     ],
     providers: [
         WsAuthenticateUserService,

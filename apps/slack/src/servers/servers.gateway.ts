@@ -10,17 +10,15 @@ import {
 } from '@nestjs/websockets';
 import { Inject, Logger, UseFilters, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { Server } from 'socket.io';
-import { Account, Server as _Server, Subscribers, subscriberRole } from '@app/database';
+import { Account } from '@app/database';
 
 // interfaces and dtos
 import { IWsAuthenticateRequest } from '@app/auth.common';
 import { SocketI } from '../interfaces/socket.client.interface';
 
 // services
-import { ServerService } from './services/server.service';
-import { SubscribersService } from './services/subscribers.service';
+import { GatewayService } from './services/gateway.service';
 import { WsAuthenticateUserService } from '../common/ws.authenticate.user.service';
-
 
 // decorators
 import { WsExtractUserData } from '@app/decorators';
@@ -33,6 +31,8 @@ import { CreateServerDto } from './dtos/create.server.dto';
 import { UpdateServerDto } from './dtos/update.server.dto';
 import { SendServerInvitationDto } from './dtos/send.server.invitation.dto';
 import { ServerMembersListDto } from './dtos/server.members.list.dto';
+import { KickUserDto } from './dtos/kick.user.dto';
+import { UserRoleChangeDto } from './dtos/user.role.change.dto';
 
 // guards
 import { WsAuthGuard } from '../guards/ws.auth.guard';
@@ -40,17 +40,6 @@ import { WsIsServerOwner } from './guards/ws.is.server.owner.guard';
 import { IsAllowedToInviteGuard } from './guards/is.allowed.to.invite.guard';
 import { IsServerMemberGuard } from './guards/ws.is.server.member.guard';
 import { WsIsServerAdminGuard } from './guards/ws.is.server.admin.guard';
-import { KickUserDto } from './dtos/kick.user.dto';
-import { UserRoleChangeDto } from './dtos/user.role.change.dto';
-
-
-interface serversI {
-    id: number;
-    name: string;
-    description: string;
-    owner: Account;
-    visible: boolean;
-}
 
 @UseFilters(new WsExceptionsFilter())
 @UsePipes(
@@ -79,12 +68,10 @@ export class ServersGateway implements OnGatewayConnection, OnGatewayDisconnect 
     server: Server;
     private readonly logger = new Logger(ServersGateway.name);
 
-
     constructor(
-        @Inject() private readonly serverService: ServerService,
-        @Inject() private readonly subscribersService: SubscribersService,
+        @Inject() private readonly gatewayService: GatewayService,
         @Inject() private readonly wsAuthenticateUserService: WsAuthenticateUserService,
-    ) { }
+    ) {}
 
     async handleConnection(client: SocketI) {
         try {
@@ -94,376 +81,190 @@ export class ServersGateway implements OnGatewayConnection, OnGatewayDisconnect 
             };
             client.data.user = await this.wsAuthenticateUserService.authenticate(request);
 
-            // OK: joining user to listening events
             client.join(`user:servers:${client.data.user.id}`);
             client.join(`user:servers:invitations:${client.data.user.id}`);
 
-            // OK: emit server list to the client
-            const servers: serversI[] = await this.handleServerJoin(client);
-
-            // OK: emit servers members to the client
-            await this.handelServerMembers(client, servers);
-
+            await this.handleServerJoin(client);
         } catch (e) {
             this.logger.error('Error handling connection');
             client.emit('ws_error', {
                 message: 'Unexpected error occurred',
             });
             client.disconnect();
-        }
-        finally {
+        } finally {
             this.logger.log(`Client connected to servers namespace: ${client.id}`);
         }
     }
 
     private async handleServerJoin(client: SocketI) {
         this.logger.log(`Emitted servers to ${client.data.user?.id}`);
-        const my_servers = await this.subscribersService.find({
-            subscriber: { id: client.data.user?.id },
-        });
-        const servers_data = my_servers.map((server) => ({
-            id: server.server.id,
-            name: server.server.name,
-            description: server.server.description,
-            owner: server.server.owner,
-            visible: server.server.visable,
-        }))
+        const servers_data = await this.gatewayService.findMyServers(client);
         this.server.to(`user:servers:${client.data.user?.id}`).emit('servers:list', {
-            message: "user servers list",
-            servers: servers_data
+            message: 'user servers list',
+            servers: servers_data,
         });
-        return servers_data as serversI[];
-    }
-
-    private async handelServerMembers(client: SocketI, servers: serversI[]) {
-        this.logger.log(`Emitted servers members to ${client.data.user?.id}`);
-        const server_members = new Map<number, {}>(), serverMembersObj = {};
-        for (const server of servers) {
-            const members = await this.subscribersService.find({
-                server: { id: server.id },
-                subscriber: { id: client.data.user?.id },
-            });
-
-            server_members.set(server.id, members.map((member) => {
-                return {
-                    id: member.subscriber.id,
-                    name: member.subscriber.username,
-                    role: member.role,
-                    joined_at: member.created_at,
-                }
-            }));
-        }
-
-        for (const [serverId, members] of server_members.entries()) serverMembersObj[serverId] = members;
-
-        this.server.to(`user:servers:${client.data.user?.id}`).emit('servers:members', {
-            message: `server members`,
-            server_members: serverMembersObj
-        });
+        return servers_data;
     }
 
     handleDisconnect(client: SocketI) {
         this.logger.log(`Client disconnected: ${client.id}`);
     }
 
-
-    /**
-     * Handles the request for the server list.
-     * 
-     * This method is triggered when a client emits the 'server:list' event.
-     * 
-     * @param client socket client who requested the server list
-     * @returns the list of servers the user is subscribed to 
-     */
-    @UseGuards(WsAuthGuard)
-    @SubscribeMessage('server:list')
-    async handleServerList(
-        @ConnectedSocket() client: SocketI,
-    ) {
-        this.logger.log(`Emitted servers to ${client.data.user?.id}`);
-        const my_servers = await this.subscribersService.find({
-            subscriber: { id: client.data.user?.id },
-        });
-
-        const servers_data = my_servers.map((server) => ({
-            id: server.server.id,
-            name: server.server.name,
-            description: server.server.description,
-            owner: server.server.owner,
-            visible: server.server.visable,
-        }))
-
-        this.server
-            .to(`user:servers:${client.data.user?.id}`)
-            .emit('servers:list', {
-                message: "user servers list",
-                servers: servers_data
-            });
-    }
-
-    /**
-     * Handles the request for the server members list.
-     * 
-     * This method is triggered when a client emits the 'server:members:list' event.
-     * 
-     * @param client socket client who requested the server members list
-     * @param serverMembersListDto server id to get the members list
-     * @returns the list of members in the server
-     */
-    @UseGuards(WsAuthGuard, IsServerMemberGuard)
-    @SubscribeMessage('server:members:list')
-    async handleServerMembersList(
-        @ConnectedSocket() client: SocketI,
-        @MessageBody() serverMembersListDto: ServerMembersListDto
-    ) {
-        this.logger.log(`user ${client.data.user?.id} requested server members list for server ${serverMembersListDto.server_id}`);
-        const members = await this.subscribersService.find({
-            server: { id: serverMembersListDto.server_id },
-        });
-
-        const filterd_members = members.filter((member) => {
-            return [subscriberRole.ADMIN, subscriberRole.MEMBER, subscriberRole.OWNER].includes(member.role)
-        });
-
-        this.server
-            .to(`user:servers:${client.data.user?.id}`)
-            .emit('server:members:list', {
-                message: "server members list",
-                server_id: serverMembersListDto.server_id,
-                server_name: filterd_members[0].server.name,
-                members: filterd_members.map((member) => {
-                    return {
-                        id: member.subscriber.id,
-                        name: member.subscriber.username,
-                        role: member.role,
-                        joined_at: member.created_at,
-                    }
-                })
-            });
-    }
-
-    /**
-     * Handles the creation of a new server.
-     * 
-     * This method is triggered when a client emits the 'create:new:server' event.
-     * 
-     * @param user user data extracted from the socket connection
-     * @param createServerDto server data to be created
-     * @returns server data, created by the user
-     */
     @UseGuards(WsAuthGuard)
     @SubscribeMessage('create:new:server')
     async handleCreateServer(
         @WsExtractUserData() user: Account,
-        @MessageBody() createServerDto: CreateServerDto
+        @MessageBody() createServerDto: CreateServerDto,
     ) {
         this.logger.log(`user ${user.id} created new server`);
-        const server = await this.serverService.create({
-            ...createServerDto,
-            owner: { id: user.id },
-        } as _Server);
-        const owner_subscriber = await this.subscribersService.create({
-            server: { id: server.id },
-            subscriber: { id: user.id },
-            role: subscriberRole.OWNER,
-        } as Subscribers);
-        this.logger.log(`user ${user.id} created new server with id ${server.id}`);
+        const { server, owner } = await this.gatewayService.createServer(user, createServerDto);
 
-        this.server
-            .to(`user:servers:${user.id}`).emit('server:created', {
-                message: 'server created',
-                server,
-                owner: owner_subscriber
-            });
+        this.server.to(`user:servers:${user.id}`).emit('server:created', {
+            message: 'server created',
+            server,
+            owner,
+        });
     }
 
+    @UseGuards(WsAuthGuard)
+    @SubscribeMessage('server:list')
+    async handleServerList(@ConnectedSocket() client: SocketI) {
+        this.logger.log(`user ${client.data.user?.id} requested server list`);
+        const servers_data = await this.handleServerJoin(client);
+        this.server.to(`user:servers:${client.data.user?.id}`).emit('servers:list', {
+            message: 'user servers list',
+            servers: servers_data,
+        });
+    }
 
-    /**
-     * Handles the update of an existing server.
-     * 
-     * This method is triggered when a client emits the 'server:update' event.
-     * 
-     * @param user user data extracted from the socket connection
-     * @param updateServerDto server data to be updated
-     * @returns updated server data
-     */
+    @UseGuards(WsAuthGuard, IsServerMemberGuard)
+    @SubscribeMessage('server:members:list')
+    async handleServerMembersList(
+        @ConnectedSocket() client: SocketI,
+        @MessageBody() serverMembersListDto: ServerMembersListDto,
+    ) {
+        this.logger.log(
+            `user ${client.data.user?.id} requested server members list for server ${serverMembersListDto.server_id}`,
+        );
+
+        const members = await this.gatewayService.findServerMembers(serverMembersListDto.server_id);
+
+        this.server.to(`user:servers:${client.data.user?.id}`).emit('server:members:list', {
+            message: 'server members list',
+            server_id: serverMembersListDto.server_id,
+            server_name: members[0].server.name,
+            members: members.map((member) => {
+                return {
+                    id: member.subscriber.id,
+                    name: member.subscriber.username,
+                    role: member.role,
+                    joined_at: member.created_at,
+                };
+            }),
+        });
+    }
+
     @UseGuards(WsAuthGuard, WsIsServerOwner)
     @SubscribeMessage('server:update')
     async handleUpdateServer(
         @WsExtractUserData() user: Account,
-        @MessageBody() updateServerDto: UpdateServerDto
+        @MessageBody() updateServerDto: UpdateServerDto,
     ) {
         this.logger.log(`user ${user.id} updated server with id ${updateServerDto.server_id}`);
-        const { server_id, ...updateData } = updateServerDto;
-        const server = await this.serverService.findOneAndUpdate(
-            { id: updateServerDto.server_id },
-            updateData
-        );
-        this.server
-            .to(`user:servers:${user.id}`).emit('server:updated', {
-                message: 'server updated',
-                server
-            });
+        const server = await this.gatewayService.updateServer(updateServerDto);
+        this.server.to(`user:servers:${user.id}`).emit('server:updated', {
+            message: 'server updated',
+            server,
+        });
 
         // TODO: emit on the general that server data updated and by how ...
     }
 
-
-    // TODO: add server users invite event
-    /*
-        require authenticated user
-        require valid server id
-        require valid user id
-    */
     @UseGuards(WsAuthGuard, IsAllowedToInviteGuard)
     @SubscribeMessage('server:users:invite')
     async handleServerUsersInvite(
-
-        @WsExtractUserData() user: Account,
-        @MessageBody() sendServerInvitationDto: SendServerInvitationDto
+        @WsExtractUserData() sender: Account,
+        @MessageBody() sendServerInvitationDto: SendServerInvitationDto,
     ) {
-        this.logger.log(`user ${user.id} invited user ${sendServerInvitationDto.receiver_id} to server ${sendServerInvitationDto.server_id}`);
+        this.logger.log(
+            `user ${sender.id} invited user ${sendServerInvitationDto.receiver_id} to server ${sendServerInvitationDto.server_id}`,
+        );
 
-        const server = await this.serverService.findOne({ id: sendServerInvitationDto.server_id });
+        const invitation = await this.gatewayService.sendInvitationToUser(
+            sender,
+            sendServerInvitationDto,
+        );
 
-        const invitation = await this.subscribersService.create({
-            server: { id: sendServerInvitationDto.server_id },
-            subscriber: { id: sendServerInvitationDto.receiver_id },
-            role: subscriberRole.PENDING,
-        } as Subscribers);
-
-        // TODO: change to event emitter in the future 
+        // TODO: change to event emitter in the future
         this.server
-            .to(`user:servers:invitations:${sendServerInvitationDto.receiver_id}`).
-            emit('server:users:invited', {
-                message: `user ${user.username} invited you to join server ${server?.name}`,
-                invitation: {
-                    server: {
-                        id: server?.id,
-                        name: server?.name,
-                        description: server?.description,
-                    },
-                    invited_by: {
-                        id: user.id,
-                        name: user.username,
-                    },
-                }
+            .to(`user:servers:invitations:${sendServerInvitationDto.receiver_id}`)
+            .emit('server:users:invited', {
+                message: `user ${sender.username} invited you to join server ${invitation.server?.name}`,
+                invitation,
             });
 
         // TODO: emit on the server general that user invited to the server
     }
 
-
-
-    /**
-     * Handles the kick of a user from a server.
-     * 
-     * This method is triggered when a client emits the 'server:users:kick' event.
-     * 
-     * @param client socket client who requested the server members list
-     * @param kickUserDto user id to be kicked and server id
-     * 
-     */
     @UseGuards(WsAuthGuard, WsIsServerAdminGuard)
     @SubscribeMessage('server:users:kick')
     async handelServerUsersKick(
         @ConnectedSocket() client: SocketI,
-        @MessageBody() kickUserDto: KickUserDto
-    ) {
+        @MessageBody() kickUserDto: KickUserDto,
+    ): Promise<void> {
         const admin = client.data.user;
         this.logger.log(`user ${admin?.id} kicked user ${admin?.id} from server ${admin?.id}`);
 
         if (admin?.id === kickUserDto.user_id) throw new WsException("you can't kick yourself");
 
-        const user_subscriber = await this.subscribersService.findOne({
-            server: { id: kickUserDto.server_id },
-            subscriber: { id: kickUserDto.user_id },
-        })
-        const admin_subscriber = await this.subscribersService.findOne({
-            server: { id: kickUserDto.server_id },
-            subscriber: { id: admin?.id },
-        })
-
-
-        if (!user_subscriber) throw new WsException("user is not a member of the server");
-        if (user_subscriber.role === subscriberRole.OWNER) throw new WsException("you can't kick the server owner");
-        if (user_subscriber.role == subscriberRole.ADMIN && admin_subscriber?.role !== subscriberRole.OWNER) throw new WsException("you can't kick the server admin, you are not the server owner");
-
-
-        await this.subscribersService.findOneAndUpdate({
-            server: { id: kickUserDto.server_id },
-            subscriber: { id: kickUserDto.user_id },
-        }, {
-            role: subscriberRole.REMOVED,
-        } as Subscribers);
+        await this.gatewayService.kickUser(admin, kickUserDto);
 
         // TODO: emit to the user that he removed from server
         // TODO: emit in the server general that user kicked
     }
 
-
     @UseGuards(WsAuthGuard, IsServerMemberGuard)
     @SubscribeMessage('server:users:leave')
     async handleServerUsersLeave(
         @ConnectedSocket() client: SocketI,
-        @MessageBody() userLeaverServerDto: KickUserDto
-    ) {
-        this.logger.log(`user ${client.data.user?.id} left server ${userLeaverServerDto.server_id}`);
+        @MessageBody() userLeaverServerDto: KickUserDto,
+    ): Promise<void> {
+        this.logger.log(
+            `user ${client.data.user?.id} left server ${userLeaverServerDto.server_id}`,
+        );
 
+        await this.gatewayService.leaveServer(client.data.user, userLeaverServerDto);
 
-        const user_subscriber = await this.subscribersService.findOne({
-            server: { id: userLeaverServerDto.server_id },
-            subscriber: { id: client.data.user?.id },
-        })
-        if (user_subscriber?.role === subscriberRole.OWNER) throw new WsException("you are the server owner, you can't leave the server");
-
-        await this.subscribersService.findOneAndUpdate({
-            server: { id: userLeaverServerDto.server_id },
-            subscriber: { id: client.data.user?.id },
-        }, {
-            role: subscriberRole.LEAVE,
-        } as Subscribers);
-
-        this.server
-            .to(`user:servers:${client.data.user?.id}`).
-            emit('server:users:left', {
-                message: `user ${client.data.user?.username} left server ${userLeaverServerDto.server_id}`,
-                server_id: userLeaverServerDto.server_id,
-            });
+        this.server.to(`user:servers:${client.data.user?.id}`).emit('server:users:left', {
+            message: `user ${client.data.user?.username} left server ${userLeaverServerDto.server_id}`,
+            server_id: userLeaverServerDto.server_id,
+        });
 
         // TODO: emit in the server general that user left
     }
-
 
     @UseGuards(WsAuthGuard, WsIsServerOwner)
     @SubscribeMessage('server:users:role:change')
     async handleServerUsersRoleChange(
         @ConnectedSocket() client: SocketI,
-        @MessageBody() userRoleChangeDto: UserRoleChangeDto
-    ){
+        @MessageBody() userRoleChangeDto: UserRoleChangeDto,
+    ): Promise<void> {
+        const owner = client.data.user;
+        this.logger.log(
+            `user ${client.data.user?.id} changed user ${userRoleChangeDto.user_id} role in server ${userRoleChangeDto.server_id}`,
+        );
 
-        const owner = client.data.user;        
-        this.logger.log(`user ${client.data.user?.id} changed user ${userRoleChangeDto.user_id} role in server ${userRoleChangeDto.server_id}`);
+        if (owner?.id === userRoleChangeDto.user_id)
+            throw new WsException("you can't change your own role");
 
-        if( owner?.id === userRoleChangeDto.user_id) throw new WsException("you can't change your own role");
+        await this.gatewayService.changeUserRole(userRoleChangeDto);
 
-
-        await this.subscribersService.findOneAndUpdate({
-            server: { id: userRoleChangeDto.server_id },
-            subscriber: { id: userRoleChangeDto.user_id },
-        }, {
-            role: userRoleChangeDto.role as string,
-        } as Subscribers);
-
-
-        this.server
-            .to(`user:servers:${client.data.user?.id}`).
-            emit('server:users:role:changed', {
-                message: `user ${client.data.user?.username} changed user ${userRoleChangeDto.user_id} role in server ${userRoleChangeDto.server_id}`,
-                server_id: userRoleChangeDto.server_id,
-                user_id: userRoleChangeDto.user_id,
-                role: userRoleChangeDto.role
-            });
+        this.server.to(`user:servers:${client.data.user?.id}`).emit('server:users:role:changed', {
+            message: `user ${client.data.user?.username} changed user ${userRoleChangeDto.user_id} role in server ${userRoleChangeDto.server_id}`,
+            server_id: userRoleChangeDto.server_id,
+            user_id: userRoleChangeDto.user_id,
+            role: userRoleChangeDto.role,
+        });
 
         // TODO: emit in the server general that user role changed
         // TODO: emit to the user that his role changed
