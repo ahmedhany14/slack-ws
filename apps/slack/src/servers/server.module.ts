@@ -10,7 +10,7 @@ import { ServerController } from './server.controller';
 import { ServersGateway } from './servers.gateway';
 import { SlackModule } from '../slack.module';
 import { SubscribersService } from './services/subscribers.service';
-import { GatewayService } from './services/gateway.service';
+import { ServerGatewayService } from './services/server.gateway.service';
 
 @Module({
     imports: [
@@ -31,11 +31,10 @@ import { GatewayService } from './services/gateway.service';
                     },
                 }),
             },
-
-        ],),
+        ]),
     ],
     controllers: [ServerController],
-    providers: [ServerService, ServersGateway, SubscribersService, GatewayService],
-    exports: [ServerService],
+    providers: [ServerService, ServersGateway, SubscribersService, ServerGatewayService],
+    exports: [ServerService, SubscribersService, ServerGatewayService],
 })
-export class ServerModule { }
+export class ServerModule {}

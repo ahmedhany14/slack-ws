@@ -17,7 +17,7 @@ import { IWsAuthenticateRequest } from '@app/auth.common';
 import { SocketI } from '../interfaces/socket.client.interface';
 
 // services
-import { GatewayService } from './services/gateway.service';
+import { ServerGatewayService } from './services/server.gateway.service';
 import { WsAuthenticateUserService } from '../common/ws.authenticate.user.service';
 
 // decorators
@@ -69,7 +69,7 @@ export class ServersGateway implements OnGatewayConnection, OnGatewayDisconnect 
     private readonly logger = new Logger(ServersGateway.name);
 
     constructor(
-        @Inject() private readonly gatewayService: GatewayService,
+        @Inject() private readonly gatewayService: ServerGatewayService,
         @Inject() private readonly wsAuthenticateUserService: WsAuthenticateUserService,
     ) {}
 

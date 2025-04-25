@@ -12,7 +12,7 @@ import { KickUserDto } from '../dtos/kick.user.dto';
 import { UserRoleChangeDto } from '../dtos/user.role.change.dto';
 
 @Injectable()
-export class GatewayService {
+export class ServerGatewayService {
     constructor(
         @Inject() private readonly serverService: ServerService,
         @Inject() private readonly subscribersService: SubscribersService,
