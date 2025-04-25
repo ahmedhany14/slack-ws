@@ -18,10 +18,10 @@ import { WsAuthenticateUserService } from '../common/ws.authenticate.user.servic
 import { IWsAuthenticateRequest } from '@app/auth.common';
 
 @WebSocketGateway()
-export class ServerMessagesGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class ServerChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @WebSocketServer()
     server: Server;
-    private readonly logger = new Logger(ServerMessagesGateway.name);
+    private readonly logger = new Logger(ServerChatsGateway.name);
 
     constructor(
         @Inject()
@@ -37,8 +37,8 @@ export class ServerMessagesGateway implements OnGatewayConnection, OnGatewayDisc
             };
             client.data.user = await this.wsAuthenticateUserService.authenticate(request);
             client.join(`user:server-messages:${client.data.user.id}`);
-
-            // TODO: Load user server chats metadata
+            // TODO: Load user server chats metadata and last 20 messages
+            await this.handelServerChatMetadata(client);
         } catch (error) {
         } finally {
             this.logger.log(`Client connected to server messages namespace: ${client.id}`);
@@ -47,6 +47,10 @@ export class ServerMessagesGateway implements OnGatewayConnection, OnGatewayDisc
 
     async handleDisconnect(@ConnectedSocket() client: SocketI) {
         this.logger.log(`Client disconnected: ${client.id}`);
+    }
+
+    private async handelServerChatMetadata(client: SocketI) {
+
     }
 
     // TODO: Create a server chat

@@ -1,12 +1,11 @@
-import { Entity, Column, JoinColumn, ManyToOne, BeforeInsert } from 'typeorm';
+import { Entity, Column, JoinColumn, ManyToOne, BeforeInsert, OneToMany } from 'typeorm';
 import { AbstractEntity } from '../abstract.entity';
 import { randomBytes } from 'crypto';
 import { Server } from './server.entity';
-
+import { ServerChat } from '@app/database/entities/server-chats/chat.entity';
 
 @Entity('namespaces')
 export class Namespaces extends AbstractEntity<Namespaces> {
-
     @Column({
         type: 'varchar',
         length: 32,
@@ -14,13 +13,12 @@ export class Namespaces extends AbstractEntity<Namespaces> {
     })
     name: string;
 
-
     @Column({
         type: 'varchar',
         unique: true,
-        nullable: true
+        nullable: true,
     })
-    ns_id: string
+    ns_id: string;
 
     @BeforeInsert()
     generateNsId() {
@@ -35,5 +33,10 @@ export class Namespaces extends AbstractEntity<Namespaces> {
         onUpdate: 'CASCADE',
     })
     @JoinColumn({ name: 'server_id' })
-    server: Server
+    server: Server;
+
+    @OneToMany(() => ServerChat, (chat) => chat.namespace, {
+        lazy: true,
+    })
+    chats: Promise<ServerChat[]>;
 }

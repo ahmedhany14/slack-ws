@@ -10,6 +10,8 @@ import { Subscribers } from './entities/server.subscribers.entiy';
 import { FriendsInvitations } from './entities/friends.invitations.entity';
 import { DirectConversation } from '@app/database/entities/dms/direct.conversation.entity';
 import { DirectConversationMessages } from './entities/dms/direct.conversations.messges.entity';
+import { ServerChat } from '@app/database/entities/server-chats/chat.entity';
+import { ServerChatMessages } from '@app/database/entities/server-chats/chat.messages.entity';
 
 @Module({
     imports: [
@@ -36,8 +38,10 @@ import { DirectConversationMessages } from './entities/dms/direct.conversations.
             Subscribers,
             FriendsInvitations,
             DirectConversation,
-            DirectConversationMessages
+            DirectConversationMessages,
+            ServerChat,
+            ServerChatMessages,
         ]),
     ],
 })
-export class DatabaseModule { }
+export class DatabaseModule {}

@@ -1,4 +1,9 @@
-import { CreateDateColumn, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+    CreateDateColumn,
+    PrimaryGeneratedColumn,
+    UpdateDateColumn,
+    DeleteDateColumn,
+} from 'typeorm';
 
 export class AbstractEntity<T> {
     @PrimaryGeneratedColumn()
@@ -16,6 +21,13 @@ export class AbstractEntity<T> {
         default: null,
     })
     updated_at: Date;
+
+    @DeleteDateColumn({
+        type: 'timestamp with time zone',
+        nullable: true,
+        default: null,
+    })
+    deleted_at: Date;
 
     constructor(entity: Partial<T> = {} as Partial<T>) {
         Object.assign(this, entity);

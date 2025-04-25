@@ -1,11 +1,11 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { ServerMessagesGateway } from './server-messages.gateway';
+import { ServerChatsGateway } from './server-chats.gateway';
 import { ServerModule } from '../servers/server.module';
 import { SlackModule } from '../slack.module';
 
 @Module({
     imports: [ServerModule, forwardRef(() => SlackModule)],
     controllers: [],
-    providers: [ServerMessagesGateway],
+    providers: [ServerChatsGateway],
 })
-export class ServerMessagesModule {}
+export class ServerChatsModule {}
