@@ -10,3 +10,5 @@ export * from './entities/namespaces.entity';
 export * from './entities/friends.invitations.entity'
 export * from './entities/dms/direct.conversation.entity'
 export * from './entities/dms/direct.conversations.messges.entity'
+export * from './entities/server-chats/chat.entity'
+export * from './entities/server-chats/chat.messages.entity'

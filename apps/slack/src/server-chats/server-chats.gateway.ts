@@ -14,6 +14,7 @@ import { SocketI } from '../interfaces/socket.client.interface';
 
 // services
 import { ServerGatewayService } from '../servers/services/server.gateway.service';
+import { ServerChatsGatewayService } from './services/server.chats.gateway.service';
 import { WsAuthenticateUserService } from '../common/ws.authenticate.user.service';
 import { IWsAuthenticateRequest } from '@app/auth.common';
 
@@ -27,8 +28,10 @@ export class ServerChatsGateway implements OnGatewayConnection, OnGatewayDisconn
         @Inject()
         private readonly serverGatewayService: ServerGatewayService,
         @Inject()
+        private readonly ServerChatsGatewayService: ServerChatsGatewayService,
+        @Inject()
         private readonly wsAuthenticateUserService: WsAuthenticateUserService,
-    ) {}
+    ) { }
 
     async handleConnection(@ConnectedSocket() client: SocketI) {
         try {
@@ -37,6 +40,9 @@ export class ServerChatsGateway implements OnGatewayConnection, OnGatewayDisconn
             };
             client.data.user = await this.wsAuthenticateUserService.authenticate(request);
             client.join(`user:server-messages:${client.data.user.id}`);
+
+            // TODO: join all his available server chats
+
             // TODO: Load user server chats metadata and last 20 messages
             await this.handelServerChatMetadata(client);
         } catch (error) {
@@ -54,6 +60,8 @@ export class ServerChatsGateway implements OnGatewayConnection, OnGatewayDisconn
     }
 
     // TODO: Create a server chat
+
+    // TODO: find server chat messages by page
 
     // TODO: Update server chat privacy
 
