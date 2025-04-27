@@ -1,5 +1,5 @@
 import { createParamDecorator, ExecutionContext, Logger } from '@nestjs/common';
-import { SocketI } from '../../../apps/slack/src/interfaces/socket.client.interface';
+import { SocketI } from '@app/interfaces/socket.client.interface';
 
 export const WsExtractUserData = createParamDecorator(
     (data: string, ctx: ExecutionContext) => {

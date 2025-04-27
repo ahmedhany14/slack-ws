@@ -4,7 +4,7 @@ import { ClientProxy } from '@nestjs/microservices';
 import { WsException } from '@nestjs/websockets';
 
 import { AUTH_SERVICE } from '@app/constants';
-import { SocketI } from '../interfaces/socket.client.interface';
+import { SocketI } from '@app/interfaces/socket.client.interface';
 import { IWsAuthenticateRequest } from '@app/auth.common';
 
 interface AuthenticatedUser {

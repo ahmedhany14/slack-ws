@@ -14,7 +14,7 @@ import { Account, Namespaces } from '@app/database';
 
 // interfaces and dtos
 import { IWsAuthenticateRequest } from '@app/auth.common';
-import { SocketI } from '../interfaces/socket.client.interface';
+import { SocketI } from '@app/interfaces';
 
 // services
 import { ServerGatewayService } from './services/server.gateway.service';
@@ -37,10 +37,10 @@ import { UserRoleChangeDto } from './dtos/user.role.change.dto';
 
 // guards
 import { WsAuthGuard } from '../guards/ws.auth.guard';
-import { WsIsServerOwner } from './guards/ws.is.server.owner.guard';
+import { WsIsServerOwner } from '../common/guards/ws.is.server.owner.guard';
 import { IsAllowedToInviteGuard } from './guards/is.allowed.to.invite.guard';
-import { WsIsServerMemberGuard } from './guards/ws.is.server.member.guard';
-import { WsIsServerAdminGuard } from './guards/ws.is.server.admin.guard';
+import { WsIsServerMemberGuard } from '../common/guards/ws.is.server.member.guard';
+import { WsIsServerAdminGuard } from '../common/guards/ws.is.server.admin.guard';
 
 @UseFilters(new WsExceptionsFilter())
 @UsePipes(

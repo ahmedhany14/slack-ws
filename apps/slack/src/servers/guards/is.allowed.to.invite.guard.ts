@@ -6,7 +6,7 @@ import {
     Logger,
     UnauthorizedException,
 } from '@nestjs/common';
-import { SocketI } from '../../interfaces/socket.client.interface';
+import { SocketI } from '@app/interfaces/socket.client.interface';
 import { SendServerInvitationDto } from '../dtos/send.server.invitation.dto';
 
 import { SubscribersService } from '../services/subscribers.service';

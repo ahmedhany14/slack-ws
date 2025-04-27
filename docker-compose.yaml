@@ -30,6 +30,7 @@ services:
             - '3003:3003' # for friend ws
             - '3004:3004' # for servers ws
             - '3005:3005' # for namespaces ws
+            - '3006:3006' # for server-chats ws
         volumes:
             - .:/app
         env_file:

@@ -4,11 +4,9 @@ import {
     Inject,
     Injectable,
     Logger,
-    UnauthorizedException,
 } from '@nestjs/common';
-import { SocketI } from '../../interfaces/socket.client.interface';
-import { ServerService } from '../services/server.service';
-import { SubscribersService } from '../services/subscribers.service';
+import { SocketI } from '@app/interfaces';
+import { SubscribersService } from '../../servers/services/subscribers.service';
 import { subscriberRole } from '@app/database';
 import { WsException } from '@nestjs/websockets';
 

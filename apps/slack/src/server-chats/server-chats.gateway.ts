@@ -10,7 +10,7 @@ import {
 } from '@nestjs/websockets';
 import { Inject, Logger, UseFilters, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { Server } from 'socket.io';
-import { SocketI } from '../interfaces/socket.client.interface';
+import { SocketI } from '@app/interfaces/socket.client.interface';
 
 // services
 import { ServerGatewayService } from '../servers/services/server.gateway.service';
@@ -18,7 +18,38 @@ import { ServerChatsGatewayService } from './services/server.chats.gateway.servi
 import { WsAuthenticateUserService } from '../common/ws.authenticate.user.service';
 import { IWsAuthenticateRequest } from '@app/auth.common';
 
-@WebSocketGateway()
+// guards
+import { WsAuthGuard } from '../guards/ws.auth.guard';
+import { WsIsServerOwner } from '../common/guards/ws.is.server.owner.guard';
+import { WsIsServerMemberGuard } from '../common/guards/ws.is.server.member.guard';
+import { WsIsServerAdminGuard } from '../common/guards/ws.is.server.admin.guard';
+import { WsExceptionsFilter } from '@app/interceptors';
+import { CreateServerChatDto } from './dtos/create.server.chat.dto';
+import { ServerChatService } from './services/server.chat.service';
+import { ServerChat } from '@app/database';
+
+@UseFilters(new WsExceptionsFilter())
+@UsePipes(
+    new ValidationPipe({
+        transform: true,
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        exceptionFactory: (errors) => {
+            const messages = errors.map(
+                (error) => `${error.property}: ${Object.values(error.value).join(', ')}`,
+            );
+            throw new WsException(messages);
+        },
+    }),
+)
+@WebSocketGateway(3006, {
+    namespace: 'server-chats',
+    cors: {
+        origin: '*',
+        methods: ['GET', 'POST'],
+        credentials: true,
+    },
+})
 export class ServerChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @WebSocketServer()
     server: Server;
@@ -28,10 +59,12 @@ export class ServerChatsGateway implements OnGatewayConnection, OnGatewayDisconn
         @Inject()
         private readonly serverGatewayService: ServerGatewayService,
         @Inject()
+        private readonly serverChatService: ServerChatService,
+        @Inject()
         private readonly ServerChatsGatewayService: ServerChatsGatewayService,
         @Inject()
         private readonly wsAuthenticateUserService: WsAuthenticateUserService,
-    ) { }
+    ) {}
 
     async handleConnection(@ConnectedSocket() client: SocketI) {
         try {
@@ -55,23 +88,52 @@ export class ServerChatsGateway implements OnGatewayConnection, OnGatewayDisconn
         this.logger.log(`Client disconnected: ${client.id}`);
     }
 
-    private async handelServerChatMetadata(client: SocketI) {
+    private async handelServerChatMetadata(client: SocketI) {}
+
+    // TODO: Create a server chat
+    @UseGuards(WsAuthGuard, WsIsServerAdminGuard)
+    @SubscribeMessage('create:server:chat')
+    async handleCreateServerChat(
+        @ConnectedSocket() client: SocketI,
+        @MessageBody() createServerChatDto: CreateServerChatDto,
+    ) {
+        this.logger.log('Creating a new server chat');
+
+        const chat = await this.serverChatService.create({
+            name: createServerChatDto.name,
+            namespace: { id: createServerChatDto.namespace_id },
+            chat_type: createServerChatDto.chat_type,
+        } as ServerChat);
+
+        // TODO: emit to all server members that a new chat has been created, but only authorized members can open it and see, send messages, etc.
+        // this.server
+        //     .to()
+        //     .emit()
+    }
+
+    // TODO: Update server chat privacy
+    @UseGuards(WsAuthGuard, WsIsServerAdminGuard)
+    @SubscribeMessage('update:server:chat')
+    async handleUpdateServerChat(){
 
     }
 
-    // TODO: Create a server chat
-
-    // TODO: find server chat messages by page
-
-    // TODO: Update server chat privacy
 
     // TODO: Delete server chat
+    @UseGuards(WsAuthGuard, WsIsServerOwner)
+    @SubscribeMessage('delete:server:chat')
+    async handleDeleteServerChat(){}
 
     // TODO: if chat private, add user to server chat
+    @UseGuards(WsAuthGuard, WsIsServerAdminGuard)
+    @SubscribeMessage('add:user:to:server:chat')
+    async handleAddUserToServerChat() {}
 
     // TODO: Send message to server chat
 
     // TODO: Delete message from server chat
 
     // TODO: Edit message from server chat
+
+    // TODO: find server chat messages by page
 }

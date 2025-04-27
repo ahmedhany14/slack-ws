@@ -21,5 +21,4 @@ export class ServerChatsGatewayService {
             namespace: { id: namespace_id },
         } as ServerChat);
     }
-
 }

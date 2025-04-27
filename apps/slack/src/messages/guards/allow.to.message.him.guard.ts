@@ -6,7 +6,7 @@ import { Account, RequestStatus } from '@app/database';
 
 import { FriendsService } from '../../friends/friends.service';
 import { SendDmMessageDto } from '../dtos/send.dm.message.dto';
-import { SocketI } from '../../interfaces/socket.client.interface';
+import { SocketI } from '@app/interfaces/socket.client.interface';
 
 
 @Injectable()

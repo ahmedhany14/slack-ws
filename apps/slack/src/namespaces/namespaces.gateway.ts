@@ -33,11 +33,11 @@ import { CreateNamespaceDto } from './dtos/create.namespace.dto';
 
 // guards
 import { WsAuthGuard } from '../guards/ws.auth.guard';
-import { WsIsServerOwner } from '../servers/guards/ws.is.server.owner.guard';
+import { WsIsServerOwner } from '../common/guards/ws.is.server.owner.guard';
 import { IsAllowedToInviteGuard } from '../servers/guards/is.allowed.to.invite.guard';
-import { WsIsServerMemberGuard } from '../servers/guards/ws.is.server.member.guard';
-import { WsIsServerAdminGuard } from '../servers/guards/ws.is.server.admin.guard';
-import { SocketI } from '../interfaces/socket.client.interface';
+import { WsIsServerMemberGuard } from '../common/guards/ws.is.server.member.guard';
+import { WsIsServerAdminGuard } from '../common/guards/ws.is.server.admin.guard';
+import { SocketI } from '@app/interfaces/socket.client.interface';
 import { IWsAuthenticateRequest } from '@app/auth.common';
 import { DeleteNamespaceDto } from './dtos/delete.namespaces.dto';
 import { UpdateNamespaceDto } from './dtos/update.namespace.dto';

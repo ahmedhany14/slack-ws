@@ -1,6 +1,6 @@
 import { CanActivate, ConflictException, ExecutionContext, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { DmsService } from '../../dms/dms.service';
-import { SocketI } from '../../interfaces/socket.client.interface';
+import { SocketI } from '@app/interfaces';
 import { MarkMessageAsReadDto } from '../../messages/dtos/mark.message.as-read.dto';
 import { MessagesService } from '../../messages/messages.service';
 import { DirectConversation } from '@app/database';

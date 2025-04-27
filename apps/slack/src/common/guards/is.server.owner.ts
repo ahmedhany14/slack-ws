@@ -7,7 +7,7 @@ import {
     UnauthorizedException,
 } from '@nestjs/common';
 import { RequestI } from '@app/interfaces';
-import { ServerService } from '../services/server.service';
+import { ServerService } from '../../servers/services/server.service';
 
 @Injectable()
 export class IsServerOwner implements CanActivate {

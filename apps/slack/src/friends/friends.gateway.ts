@@ -13,7 +13,7 @@ import { Server, Socket } from 'socket.io';
 
 // interfaces and dtos
 import { IWsAuthenticateRequest } from '@app/auth.common';
-import { SocketI } from '../interfaces/socket.client.interface';
+import { SocketI } from '@app/interfaces/socket.client.interface';
 import { AcceptFriendRequestDto, SendFriendRequestDto, RejectFriendRequestDto, CancelFriendRequestDto } from './dtos/friend.reques.id.validators.dto';
 import { FriendsInvitations, RequestStatus } from '@app/database';
 

@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ServerService } from './server.service';
 import { SubscribersService } from './subscribers.service';
-import { SocketI } from '../../interfaces/socket.client.interface';
+import { SocketI } from '@app/interfaces';
 import { ServerI, ServerInvitation } from '../interfaces/server.gatewat.interfaces';
 import { Account, Server as _Server, subscriberRole, Subscribers } from '@app/database';
 import { CreateServerDto } from '../dtos/create.server.dto';

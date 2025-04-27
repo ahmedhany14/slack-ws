@@ -21,7 +21,7 @@ import { ServerService } from './services/server.service';
 // dto
 import { CreateServerDto } from './dtos/create.server.dto';
 import { UpdateServerDto } from './dtos/update.server.dto';
-import { IsServerOwner } from './guards/is.server.owner';
+import { IsServerOwner } from '../common/guards/is.server.owner';
 import { SubscribersService } from './services/subscribers.service';
 
 @Controller('server')

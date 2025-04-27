@@ -2,15 +2,12 @@ import {
     CanActivate,
     ExecutionContext,
     Inject,
-    Injectable,
     Logger,
-    UnauthorizedException,
 } from '@nestjs/common';
-import { SocketI } from '../../interfaces/socket.client.interface';
+import { SocketI } from '@app/interfaces';
 import { WsException } from '@nestjs/websockets';
-import { ServerMembersListDto } from '../dtos/server.members.list.dto';
-import { SubscribersService } from '../services/subscribers.service';
-import { ServerService } from '../services/server.service';
+import { ServerMembersListDto } from '../../servers/dtos/server.members.list.dto';
+import { SubscribersService } from '../../servers/services/subscribers.service';
 import { subscriberRole } from '@app/database';
 
 

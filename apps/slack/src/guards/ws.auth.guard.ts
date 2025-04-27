@@ -2,7 +2,7 @@ import { CanActivate, ExecutionContext, Inject, Injectable } from '@nestjs/commo
 import { Socket } from 'socket.io';
 import { WsAuthenticateUserService } from '../common/ws.authenticate.user.service';
 import { WsException } from '@nestjs/websockets';
-import { SocketI } from '../interfaces/socket.client.interface';
+import { SocketI } from '@app/interfaces/socket.client.interface';
 
 @Injectable()
 export class WsAuthGuard implements CanActivate {

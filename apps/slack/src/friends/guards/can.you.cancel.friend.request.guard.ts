@@ -3,7 +3,7 @@ import { WsException } from '@nestjs/websockets';
 import { FriendsService } from '../friends.service';
 
 // entities and interfaces
-import { SocketI } from '../../interfaces/socket.client.interface';
+import { SocketI } from '@app/interfaces/socket.client.interface';
 import { CancelFriendRequestDto } from '../dtos/friend.reques.id.validators.dto';
 import { FriendsInvitations, RequestStatus } from '@app/database';
 

@@ -13,7 +13,7 @@ import { Server } from 'socket.io';
 
 // interfaces and dtos
 import { IWsAuthenticateRequest } from '@app/auth.common';
-import { SocketI } from '../interfaces/socket.client.interface';
+import { SocketI } from '@app/interfaces/socket.client.interface';
 import { SendDmMessageDto } from './dtos/send.dm.message.dto';
 import { MarkMessageAsDeliveredDto, MarkMessageAsReadDto } from './dtos/mark.message.as-read.dto';
 import { FetchConversationMessagesDto } from './dtos/fetch.conversation.messages.dto';
