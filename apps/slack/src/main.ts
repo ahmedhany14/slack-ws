@@ -7,6 +7,7 @@ import { WsMessagesAdapter } from './common/adapters/ws.messages.adapter';
 import { WsDmsAdapter } from './common/adapters/ws.dms.adapter';
 import { WsFriendsAdapter } from './common/adapters/ws.friends.adapter';
 import { WsServersAdapter } from './common/adapters/ws.servers.adapter';
+import { WsNameSpacesAdapter } from './common/adapters/ws.namespaces.adapter';
 
 async function bootstrap() {
     const app = await NestFactory.create(SlackModule);
@@ -40,7 +41,8 @@ async function bootstrap() {
     app.useWebSocketAdapter(new WsMessagesAdapter());
     app.useWebSocketAdapter(new WsFriendsAdapter());
     app.useWebSocketAdapter(new WsServersAdapter());
-
+    app.useWebSocketAdapter(new WsNameSpacesAdapter());
+    
     await app.listen(process.env.SLACK_HTTP_PORT ?? 3000);
 }
 

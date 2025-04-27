@@ -39,7 +39,7 @@ import { UserRoleChangeDto } from './dtos/user.role.change.dto';
 import { WsAuthGuard } from '../guards/ws.auth.guard';
 import { WsIsServerOwner } from './guards/ws.is.server.owner.guard';
 import { IsAllowedToInviteGuard } from './guards/is.allowed.to.invite.guard';
-import { IsServerMemberGuard } from './guards/ws.is.server.member.guard';
+import { WsIsServerMemberGuard } from './guards/ws.is.server.member.guard';
 import { WsIsServerAdminGuard } from './guards/ws.is.server.admin.guard';
 
 @UseFilters(new WsExceptionsFilter())
@@ -151,7 +151,7 @@ export class ServersGateway implements OnGatewayConnection, OnGatewayDisconnect 
         });
     }
 
-    @UseGuards(WsAuthGuard, IsServerMemberGuard)
+    @UseGuards(WsAuthGuard, WsIsServerMemberGuard)
     @SubscribeMessage('server:members:list')
     async handleServerMembersList(
         @ConnectedSocket() client: SocketI,
@@ -237,7 +237,7 @@ export class ServersGateway implements OnGatewayConnection, OnGatewayDisconnect 
         // TODO: emit in the server general that user kicked
     }
 
-    @UseGuards(WsAuthGuard, IsServerMemberGuard)
+    @UseGuards(WsAuthGuard, WsIsServerMemberGuard)
     @SubscribeMessage('server:users:leave')
     async handleServerUsersLeave(
         @ConnectedSocket() client: SocketI,

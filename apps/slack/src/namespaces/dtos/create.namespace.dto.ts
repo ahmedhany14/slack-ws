@@ -1,7 +1,10 @@
+import { IsExistServer } from '@app/validators';
 import {
     IsEmail,
     IsNotEmpty,
+    IsNumber,
     IsOptional,
+    IsPositive,
     IsString,
     Length,
     MaxLength,
@@ -14,4 +17,9 @@ export class CreateNamespaceDto {
     @IsNotEmpty()
     @MaxLength(32)
     name: string;
+
+    @IsNumber()
+    @IsPositive()
+    @IsExistServer()
+    server_id: number;
 }

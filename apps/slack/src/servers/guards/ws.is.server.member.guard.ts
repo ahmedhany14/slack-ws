@@ -14,12 +14,11 @@ import { ServerService } from '../services/server.service';
 import { subscriberRole } from '@app/database';
 
 
-export class IsServerMemberGuard implements CanActivate {
-    private readonly logger: Logger = new Logger(IsServerMemberGuard.name);
+export class WsIsServerMemberGuard implements CanActivate {
+    private readonly logger: Logger = new Logger(WsIsServerMemberGuard.name);
 
     constructor(
         @Inject() private readonly subscribersService: SubscribersService,
-        @Inject() private readonly serverService: ServerService,
     ) { }
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
