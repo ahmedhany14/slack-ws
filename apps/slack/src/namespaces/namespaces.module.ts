@@ -30,6 +30,7 @@ import { AUTH_SERVICE } from '@app/constants';
 
     ],
     controllers: [NamespacesController],
-    providers: [NamespacesService]
+    providers: [NamespacesService],
+    exports: [NamespacesService],
 })
 export class NamespacesModule { }

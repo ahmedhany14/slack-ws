@@ -11,9 +11,13 @@ import { ServersGateway } from './servers.gateway';
 import { SlackModule } from '../slack.module';
 import { SubscribersService } from './services/subscribers.service';
 import { ServerGatewayService } from './services/server.gateway.service';
+import { NamespacesModule } from '../namespaces/namespaces.module';
+import { ServerChatsModule } from '../server-chats/server-chats.module';
 
 @Module({
     imports: [
+        NamespacesModule,
+        forwardRef(() => ServerChatsModule),
         DatabaseModule,
         forwardRef(() => SlackModule),
         TypeOrmModule.forFeature([Server, Subscribers]),

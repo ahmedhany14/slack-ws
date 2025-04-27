@@ -14,11 +14,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
             ServerChat,
             ServerChatMessages
         ]),
-        ServerModule,
-        forwardRef(() => SlackModule)
-
+        forwardRef(() => SlackModule),
+        forwardRef(() => ServerModule)
     ],
     controllers: [],
     providers: [ServerChatsGateway, ServerChatsGatewayService, ServerChatService, ServerChatMessagesService],
+    exports: [ServerChatsGateway, ServerChatsGatewayService, ServerChatService, ServerChatMessagesService],
 })
 export class ServerChatsModule { }

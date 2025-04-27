@@ -10,7 +10,7 @@ import {
 } from '@nestjs/websockets';
 import { Inject, Logger, UseFilters, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { Server } from 'socket.io';
-import { Account } from '@app/database';
+import { Account, Namespaces } from '@app/database';
 
 // interfaces and dtos
 import { IWsAuthenticateRequest } from '@app/auth.common';
@@ -18,8 +18,9 @@ import { SocketI } from '../interfaces/socket.client.interface';
 
 // services
 import { ServerGatewayService } from './services/server.gateway.service';
+import { NamespacesService } from '../namespaces/namespaces.service';
 import { WsAuthenticateUserService } from '../common/ws.authenticate.user.service';
-
+import { ServerChatsGatewayService } from '../server-chats/services/server.chats.gateway.service';
 // decorators
 import { WsExtractUserData } from '@app/decorators';
 
@@ -70,6 +71,8 @@ export class ServersGateway implements OnGatewayConnection, OnGatewayDisconnect 
 
     constructor(
         @Inject() private readonly gatewayService: ServerGatewayService,
+        @Inject() private readonly serverChatsGatewayService: ServerChatsGatewayService,
+        @Inject() private readonly NamespacesService: NamespacesService,
         @Inject() private readonly wsAuthenticateUserService: WsAuthenticateUserService,
     ) {}
 
@@ -119,10 +122,21 @@ export class ServersGateway implements OnGatewayConnection, OnGatewayDisconnect 
         this.logger.log(`user ${user.id} created new server`);
         const { server, owner } = await this.gatewayService.createServer(user, createServerDto);
 
+        const general_namespace = await this.NamespacesService.create({
+            name: 'general',
+            server: { id: server.id },
+        } as Namespaces);
+
+        const general_chat = await this.serverChatsGatewayService.createServerChat(
+            general_namespace.id
+        )
+
         this.server.to(`user:servers:${user.id}`).emit('server:created', {
             message: 'server created',
             server,
             owner,
+            general_namespace,
+            general_chat,
         });
     }
 
